@@ -10,32 +10,60 @@ interface CanvasBoardProps {
 
 const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, onSave }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
 
-  useEffect(() => {
+  // Función para ajustar el tamaño del canvas al contenedor
+  const resizeCanvas = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
-    // Tamaño optimizado para tablet
-    const container = canvas.parentElement;
-    const width = container?.clientWidth || 800;
-    const height = container?.clientHeight || 600;
+    const { width, height } = container.getBoundingClientRect();
+    
+    // Guardamos el contenido actual para no perderlo al redimensionar
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    if (tempCtx) tempCtx.drawImage(canvas, 0, 0);
 
-    canvas.width = width * 2; // HD scale
-    canvas.height = height * 2;
+    // Ajustamos resolución física (DPR) para que se vea nítido en tablets
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
 
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      ctx.scale(2, 2);
+      ctx.scale(dpr, dpr);
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, width, height);
+      
+      // Restauramos el dibujo previo escalado
+      ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, width, height);
       contextRef.current = ctx;
     }
+  };
+
+  useEffect(() => {
+    resizeCanvas();
+    
+    // Escuchar cambios de tamaño en la ventana o rotación de tablet
+    window.addEventListener('resize', resizeCanvas);
+    
+    // Observer para cambios en el contenedor flex
+    const observer = new ResizeObserver(() => resizeCanvas());
+    if (containerRef.current) observer.observe(containerRef.current);
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      observer.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -45,16 +73,23 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     }
   }, [brushColor, brushSize, tool]);
 
-  const startDrawing = (e: any) => {
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
+  const getCoordinates = (e: any) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
     
+    const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
+    // Calculamos la posición relativa al tamaño visual del canvas
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  };
 
+  const startDrawing = (e: any) => {
+    const { x, y } = getCoordinates(e);
     contextRef.current?.beginPath();
     contextRef.current?.moveTo(x, y);
     setIsDrawing(true);
@@ -62,16 +97,7 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
   const draw = (e: any) => {
     if (!isDrawing || !contextRef.current) return;
-    
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-
+    const { x, y } = getCoordinates(e);
     contextRef.current.lineTo(x, y);
     contextRef.current.stroke();
   };
@@ -81,12 +107,13 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     setIsDrawing(false);
     contextRef.current?.closePath();
     if (canvasRef.current) {
+      // Guardamos una versión ligera para la galería
       onSave(canvasRef.current.toDataURL('image/webp', 0.5));
     }
   };
 
   return (
-    <div className="w-full h-full bg-white rounded-[2rem] shadow-2xl overflow-hidden border-8 border-pink-100 cursor-crosshair">
+    <div ref={containerRef} className="w-full h-full bg-white rounded-[2rem] shadow-2xl overflow-hidden border-8 border-pink-100 cursor-crosshair">
       <canvas
         ref={canvasRef}
         onMouseDown={startDrawing}
@@ -96,7 +123,7 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
         onTouchStart={startDrawing}
         onTouchMove={draw}
         onTouchEnd={endDrawing}
-        className="touch-none w-full h-full"
+        className="touch-none block"
       />
     </div>
   );

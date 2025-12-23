@@ -13,10 +13,10 @@ const IconButton: React.FC<IconButtonProps> = ({ icon, onClick, label, colorClas
   return (
     <button
       onClick={onClick}
-      className={`${colorClass} ${pulse ? 'animate-pulse' : ''} active:scale-95 transition-all text-white w-14 h-14 md:w-16 md:h-16 rounded-full shadow-lg flex flex-col items-center justify-center gap-1 border-4 border-white`}
+      className={`${colorClass} ${pulse ? 'animate-pulse' : ''} active:scale-95 transition-all text-white w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg flex flex-col items-center justify-center gap-0.5 border-4 border-white flex-shrink-0`}
     >
-      <i className={`fas ${icon} text-xl md:text-2xl`}></i>
-      {label && <span className="text-[10px] font-bold uppercase">{label}</span>}
+      <i className={`fas ${icon} text-lg md:text-xl`}></i>
+      {label && <span className="text-[8px] font-bold uppercase">{label}</span>}
     </button>
   );
 };
