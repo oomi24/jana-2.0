@@ -55,70 +55,70 @@ export const WARRIORS: Record<ModuleId, Warrior> = {
 };
 
 const ART_CHALLENGES = [
-  "Dibuja un Sol muy brillante y amarillo.",
-  "Dibuja un Corazón de color rosa.",
-  "Dibuja una Estrella de color dorado.",
-  "Dibuja una Flor con pétalos de colores.",
-  "Dibuja una Casita con una puerta marrón.",
-  "Dibuja un Gatito con orejas puntiagudas.",
-  "Dibuja un Helado de fresa y chocolate.",
-  "Dibuja un Arcoíris con todos sus colores.",
-  "Dibuja una Mariposa volando feliz.",
-  "Dibuja una Piruleta o caramelo redondo.",
-  "Dibuja un Árbol con muchas manzanas rojas.",
-  "Dibuja una Nube azul y sonriente.",
-  "Dibuja un Pececito nadando en el agua.",
-  "Dibuja un Globo de color morado.",
-  "Dibuja una Carita Feliz gigante.",
-  "Dibuja un Vestido de princesa rosa.",
-  "Dibuja una Corona con joyas brillantes.",
-  "Dibuja un Pastel de cumpleaños con velas.",
-  "Dibuja una Luna blanca en el cielo negro.",
-  "Dibuja un Cohete viajando a las estrellas.",
-  "Dibuja un Lápiz de color gigante.",
-  "Dibuja una Manzana roja y jugosa.",
-  "Dibuja un Osito de peluche marrón.",
-  "Dibuja un Barquito de papel en el mar.",
-  "Dibuja una Sombrilla de colores.",
-  "Dibuja una Pelota de playa saltarina.",
-  "Dibuja un Sol con gafas de sol.",
-  "Dibuja una Hoja verde de un árbol.",
-  "Dibuja un Pollito amarillo pequeñito.",
-  "Dibuja un Regalo con un lazo grande.",
-  "Dibuja un Micrófono para cantar K-Pop.",
-  "Dibuja una Nota musical saltarina.",
-  "Dibuja un Diamante que brille mucho.",
-  "Dibuja una Varita mágica con estrellas.",
-  "Dibuja un Auricular de color neón.",
-  "Dibuja un Zapato de baile brillante.",
-  "Dibuja una Mochila para la escuela.",
-  "Dibuja un Pincel lleno de pintura.",
-  "Dibuja un Cubo y una pala de arena.",
-  "Dibuja una Galleta con chispas de chocolate.",
-  "Dibuja una Fresa roja con puntitos.",
-  "Dibuja un Plátano amarillo y curvo.",
-  "Dibuja un Sandía verde por fuera y roja por dentro.",
-  "Dibuja un Gorrito de fiesta de colores.",
-  "Dibuja un Tambor para hacer música.",
-  "Dibuja una Guitarra eléctrica pequeña.",
-  "Dibuja un Robot con botones de colores.",
-  "Dibuja un Avión volando alto.",
-  "Dibuja una Bicicleta con ruedas negras.",
-  "Dibuja un Tren con muchos vagones.",
-  "Dibuja un Patito de goma amarillo.",
-  "Dibuja un Cubo de rubik de colores.",
-  "Dibuja una Cometa volando con el viento.",
-  "Dibuja una Abeja con rayas amarillas y negras.",
-  "Dibuja una Mariquita roja con lunares negros.",
-  "Dibuja un Caracol con su casita a cuestas.",
-  "Dibuja una Tortuga verde y lenta.",
-  "Dibuja un Conejito con orejas largas.",
-  "Dibuja un Panda blanco y negro.",
-  "Dibuja el Escenario de tu primer concierto."
+  "Dibuja un Sol amarillo.",
+  "Dibuja un Corazón rosa.",
+  "Dibuja una Estrella dorada.",
+  "Dibuja una Flor de colores.",
+  "Dibuja una Casita pequeña.",
+  "Dibuja un Gatito feliz.",
+  "Dibuja un Helado de fresa.",
+  "Dibuja un Arcoíris.",
+  "Dibuja una Mariposa.",
+  "Dibuja una Piruleta redonda.",
+  "Dibuja un Árbol con manzanas.",
+  "Dibuja una Nube sonriente.",
+  "Dibuja un Pececito azul.",
+  "Dibuja un Globo morado.",
+  "Dibuja una Carita Feliz.",
+  "Dibuja un Vestido rosa.",
+  "Dibuja una Corona de reina.",
+  "Dibuja un Pastel con velas.",
+  "Dibuja la Luna blanca.",
+  "Dibuja un Cohete espacial.",
+  "Dibuja un Lápiz de color.",
+  "Dibuja una Manzana roja.",
+  "Dibuja un Osito de peluche.",
+  "Dibuja un Barquito en el mar.",
+  "Dibuja una Sombrilla.",
+  "Dibuja una Pelota de playa.",
+  "Dibuja un Sol con gafas.",
+  "Dibuja una Hoja verde.",
+  "Dibuja un Pollito amarillo.",
+  "Dibuja un Regalo con lazo.",
+  "Dibuja un Micrófono K-Pop.",
+  "Dibuja una Nota musical.",
+  "Dibuja un Diamante azul.",
+  "Dibuja una Varita mágica.",
+  "Dibuja un Auricular neón.",
+  "Dibuja un Zapato brillante.",
+  "Dibuja una Mochila rosa.",
+  "Dibuja un Pincel con pintura.",
+  "Dibuja un Cubo de arena.",
+  "Dibuja una Galleta rica.",
+  "Dibuja una Fresa roja.",
+  "Dibuja un Plátano amarillo.",
+  "Dibuja una Sandía verde.",
+  "Dibuja un Gorrito de fiesta.",
+  "Dibuja un Tambor pequeño.",
+  "Dibuja una Guitarra azul.",
+  "Dibuja un Robot de colores.",
+  "Dibuja un Avión blanco.",
+  "Dibuja una Bici roja.",
+  "Dibuja un Tren largo.",
+  "Dibuja un Patito de goma.",
+  "Dibuja un Cubo de juguete.",
+  "Dibuja una Cometa alta.",
+  "Dibuja una Abeja rayada.",
+  "Dibuja una Mariquita roja.",
+  "Dibuja un Caracol lento.",
+  "Dibuja una Tortuga verde.",
+  "Dibuja un Conejito blanco.",
+  "Dibuja un Oso Panda.",
+  "Dibuja un Escenario K-Pop."
 ];
 
 const getFlagSVG = (pais: string) => {
-  const common = 'width="100%" height="100%" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" style="display:block; border-radius:8px; border:2px solid #eee;"';
+  const common = 'width="100%" height="100%" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" style="display:block; border-radius:8px; border:4px solid #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"';
   
   switch(pais) {
     case "Argentina": return `<svg ${common}><rect width="900" height="200" fill="#75AADB"/><rect y="200" width="900" height="200" fill="#FFFFFF"/><rect y="400" width="900" height="200" fill="#75AADB"/><circle cx="450" cy="300" r="60" fill="#FFD700"/></svg>`;
@@ -186,7 +186,7 @@ const generateLevels = (): Level[] => {
 
       if (mod === 'color') {
         type = 'paint';
-        objective = ART_CHALLENGES[i-1] || `Reto de dibujo artístico nivel ${i}`;
+        objective = ART_CHALLENGES[i-1] || `Dibuja algo lindo (Nivel ${i})`;
       } 
       
       else if (mod === 'math') {
@@ -247,9 +247,9 @@ const generateLevels = (): Level[] => {
           visual = getFlagSVG(item.pais);
           options = [
             { text: item.pais, isCorrect: true },
-            { text: "Portugal", isCorrect: false },
+            { text: "Italia", isCorrect: false },
             { text: "Corea del Norte", isCorrect: false },
-            { text: "Vietnam", isCorrect: false }
+            { text: "Portugal", isCorrect: false }
           ].sort(() => Math.random() - 0.5);
           
           factCard = { 
@@ -257,7 +257,6 @@ const generateLevels = (): Level[] => {
             curiosity: `Colores: ${item.colores.join(', ')}. ${item.desc}` 
           };
         } else if (i <= 40) {
-          // Niveles adicionales de banderas para rellenar el rango 21-40 y evitar errores de índice
           const item = BANDERAS_INFO[(i - 21) % BANDERAS_INFO.length];
           objective = "Banderas del Mundo II";
           question = "¿De qué país es esta bandera?";
@@ -282,14 +281,21 @@ const generateLevels = (): Level[] => {
               { n: "Miranda", c: "Los Teques" }, { n: "Táchira", c: "San Cristóbal" }
             ];
             const s = states[(i - 42) % states.length];
-            question = `¿Cuál es la capital del estado ${s.n}?`;
-            visual = getFlagSVG("Venezuela");
-            options = [
-              { text: s.c, isCorrect: true },
-              { text: "Caracas", isCorrect: false },
-              { text: "Mérida", isCorrect: false },
-              { text: "Barcelona", isCorrect: false }
-            ].sort(() => Math.random() - 0.5);
+            // Fix: Defensive check for s
+            if (s) {
+               question = `¿Cuál es la capital del estado ${s.n}?`;
+               visual = getFlagSVG("Venezuela");
+               options = [
+                 { text: s.c, isCorrect: true },
+                 { text: "Caracas", isCorrect: false },
+                 { text: "Mérida", isCorrect: false },
+                 { text: "Barcelona", isCorrect: false }
+               ].sort(() => Math.random() - 0.5);
+            } else {
+               question = "¿Cuál es la capital de Venezuela?";
+               visual = getFlagSVG("Venezuela");
+               options = [{ text: "Caracas", isCorrect: true }, { text: "Lima", isCorrect: false }, { text: "Quito", isCorrect: false }, { text: "Bogotá", isCorrect: false }];
+            }
           }
         } else { 
           objective = "Especial: Estado Miranda";
@@ -301,15 +307,18 @@ const generateLevels = (): Level[] => {
             { q: "Miranda limita al norte con el Mar...", a: "Caribe", v: "🌊" }
           ];
           const item = mirandaQ[(i - 51) % mirandaQ.length];
-          question = item.q;
-          visual = item.v;
-          options = [
-            { text: item.a, isCorrect: true },
-            { text: "Maracay", isCorrect: false },
-            { text: "San Cristóbal", isCorrect: false },
-            { text: "Margarita", isCorrect: false }
-          ].sort(() => Math.random() - 0.5);
-          factCard = { title: "Miranda", curiosity: "¡Es tu estado! Tiene los Diablos Danzantes de Yare." };
+          // Fix: Defensive check for item
+          if (item) {
+            question = item.q;
+            visual = item.v;
+            options = [
+              { text: item.a, isCorrect: true },
+              { text: "Maracay", isCorrect: false },
+              { text: "San Cristóbal", isCorrect: false },
+              { text: "Margarita", isCorrect: false }
+            ].sort(() => Math.random() - 0.5);
+            factCard = { title: "Miranda", curiosity: "¡Es tu estado! Tiene los Diablos Danzantes de Yare." };
+          }
         }
       } 
       
@@ -324,14 +333,16 @@ const generateLevels = (): Level[] => {
           { q: "Parte de la planta que toma agua:", a: "Raíz", v: "🌱" }
         ];
         const item = scienceQ[(i - 1) % scienceQ.length];
-        question = item.q;
-        visual = item.v;
-        options = [
-          { text: item.a, isCorrect: true },
-          { text: "Piedra", isCorrect: false },
-          { text: "Viento", isCorrect: false },
-          { text: "Nube", isCorrect: false }
-        ].sort(() => Math.random() - 0.5);
+        if (item) {
+          question = item.q;
+          visual = item.v;
+          options = [
+            { text: item.a, isCorrect: true },
+            { text: "Piedra", isCorrect: false },
+            { text: "Viento", isCorrect: false },
+            { text: "Nube", isCorrect: false }
+          ].sort(() => Math.random() - 0.5);
+        }
       }
 
       levels.push({

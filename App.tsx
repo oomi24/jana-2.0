@@ -29,6 +29,7 @@ const App: React.FC = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationQuote, setCelebrationQuote] = useState("");
 
+  // Carga inicial desde LocalStorage
   useEffect(() => {
     const saved = localStorage.getItem('kpop_academy_progress_v3');
     if (saved) {
@@ -36,7 +37,7 @@ const App: React.FC = () => {
         const parsed = JSON.parse(saved);
         setProgress(parsed);
       } catch (e) {
-        console.error("Failed to parse progress", e);
+        console.error("Error al cargar progreso local", e);
       }
     }
     const savedSound = localStorage.getItem('kpop_academy_sound');
@@ -47,11 +48,14 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // Guardado automático y sincronización con Supabase
   useEffect(() => {
     localStorage.setItem('kpop_academy_progress_v3', JSON.stringify(progress));
-    // Sincronizar con Supabase si está configurado
+    
+    // Sincronización con Supabase (Backend)
+    const userId = 'jana_user_001'; // ID único para Jana
     if (supabase) {
-      syncProgress('jana_user_001', progress);
+      syncProgress(userId, progress).catch(err => console.error("Error de sincronización", err));
     }
   }, [progress]);
 
@@ -92,7 +96,7 @@ const App: React.FC = () => {
         setCurrentLevel(nextLevel);
         setScreen('game');
       } else {
-        setScreen('menu'); // Si terminó el módulo, vuelve a elegir guerrera
+        setScreen('menu'); 
       }
     }, 2500);
   };
@@ -102,11 +106,11 @@ const App: React.FC = () => {
       id: Date.now().toString(),
       timestamp: Date.now(),
       dataUrl,
-      title: currentLevel ? `Reto: ${currentLevel.objective}` : 'Dibujo Libre'
+      title: currentLevel ? `Misión: ${currentLevel.objective}` : 'Dibujo Libre'
     };
     setProgress(prev => ({
       ...prev,
-      gallery: [newItem, ...prev.gallery].slice(0, 20)
+      gallery: [newItem, ...prev.gallery].slice(0, 24) // Aumentado un poco la galería
     }));
   };
 
@@ -280,24 +284,54 @@ const App: React.FC = () => {
                   <div className="flex-grow flex items-center justify-center">
                     <CanvasBoard brushColor={brushColor} brushSize={brushSize} tool={tool} onSave={saveToGallery} />
                   </div>
-                  <div className="md:w-36 flex md:flex-col justify-around md:justify-start items-center gap-4 p-4 bg-white rounded-[2.5rem] shadow-xl border-4 border-pink-100">
-                      <div className="grid grid-cols-3 md:grid-cols-2 gap-2">
+                  <div className="md:w-44 flex md:flex-col justify-around md:justify-start items-center gap-4 p-4 bg-white rounded-[2.5rem] shadow-xl border-4 border-pink-100 overflow-y-auto">
+                      
+                      {/* Paleta de Colores */}
+                      <div className="grid grid-cols-4 md:grid-cols-2 gap-2">
                         {['#ec4899', '#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#000000', '#ffffff'].map(c => (
                           <button 
                             key={c} 
                             onClick={() => { 
                               sounds.playClick();
                               setBrushColor(c); 
-                              setTool('brush'); 
+                              if (tool === 'eraser') setTool('brush'); 
                             }} 
-                            className={`w-9 h-9 rounded-full border-4 ${brushColor === c ? 'border-gray-800 scale-110 shadow-lg' : 'border-gray-100'}`} 
+                            className={`w-9 h-9 rounded-full border-4 ${brushColor === c && tool !== 'eraser' ? 'border-gray-800 scale-110 shadow-lg' : 'border-gray-100'}`} 
                             style={{ backgroundColor: c }} 
                           />
                         ))}
                       </div>
-                      <IconButton icon="fa-paint-brush" onClick={() => { sounds.playClick(); setTool('brush'); }} colorClass={tool === 'brush' ? 'bg-pink-500' : 'bg-pink-100 text-pink-400'} />
-                      <IconButton icon="fa-fill-drip" onClick={() => { sounds.playClick(); setTool('fill'); }} colorClass={tool === 'fill' ? 'bg-pink-500' : 'bg-pink-100 text-pink-400'} />
-                      <IconButton icon="fa-eraser" onClick={() => { sounds.playClick(); setTool('eraser'); }} colorClass={tool === 'eraser' ? 'bg-pink-500' : 'bg-pink-100 text-pink-400'} />
+
+                      <div className="w-full h-1 bg-pink-100 rounded-full hidden md:block" />
+
+                      {/* Herramientas Principales */}
+                      <div className="flex md:flex-col gap-2">
+                        <IconButton icon="fa-paint-brush" onClick={() => { sounds.playClick(); setTool('brush'); }} colorClass={tool === 'brush' ? 'bg-pink-500' : 'bg-pink-100 text-pink-400'} />
+                        <IconButton icon="fa-fill-drip" onClick={() => { sounds.playClick(); setTool('fill'); }} colorClass={tool === 'fill' ? 'bg-pink-500' : 'bg-pink-100 text-pink-400'} />
+                        <IconButton icon="fa-eraser" onClick={() => { sounds.playClick(); setTool('eraser'); }} colorClass={tool === 'eraser' ? 'bg-pink-500' : 'bg-pink-100 text-pink-400'} />
+                      </div>
+
+                      <div className="w-full h-1 bg-pink-100 rounded-full hidden md:block" />
+
+                      {/* Selector de Tamaños */}
+                      <div className="flex md:flex-col gap-3 p-2 bg-pink-50 rounded-3xl border-2 border-pink-100">
+                        {[6, 15, 30].map(size => (
+                          <button
+                            key={size}
+                            onClick={() => { sounds.playClick(); setBrushSize(size); }}
+                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${brushSize === size ? 'bg-pink-500 scale-110 shadow-md' : 'bg-white hover:bg-pink-100'}`}
+                          >
+                            <div 
+                              className={`${brushSize === size ? 'bg-white' : 'bg-pink-400'}`} 
+                              style={{ 
+                                width: Math.max(4, size/1.5) + 'px', 
+                                height: Math.max(4, size/1.5) + 'px', 
+                                borderRadius: '50%' 
+                              }} 
+                            />
+                          </button>
+                        ))}
+                      </div>
                   </div>
                </div>
             </div>
