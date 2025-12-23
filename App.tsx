@@ -29,9 +29,11 @@ const App: React.FC = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationQuote, setCelebrationQuote] = useState("");
 
-  // Carga inicial desde LocalStorage
+  const USER_ID = 'jana_user_001';
+
+  // Carga inicial desde LocalStorage (Prioridad Offline)
   useEffect(() => {
-    const saved = localStorage.getItem('kpop_academy_progress_v3');
+    const saved = localStorage.getItem('kpop_academy_progress_v4');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -48,14 +50,13 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Guardado automático y sincronización con Supabase
+  // Guardado automático y sincronización con Supabase (Cloud Backup)
   useEffect(() => {
-    localStorage.setItem('kpop_academy_progress_v3', JSON.stringify(progress));
+    localStorage.setItem('kpop_academy_progress_v4', JSON.stringify(progress));
     
-    // Sincronización con Supabase (Backend)
-    const userId = 'jana_user_001'; // ID único para Jana
+    // Intenta sincronizar con Supabase cada vez que cambia el progreso
     if (supabase) {
-      syncProgress(userId, progress).catch(err => console.error("Error de sincronización", err));
+      syncProgress(USER_ID, progress);
     }
   }, [progress]);
 
@@ -110,7 +111,7 @@ const App: React.FC = () => {
     };
     setProgress(prev => ({
       ...prev,
-      gallery: [newItem, ...prev.gallery].slice(0, 24) // Aumentado un poco la galería
+      gallery: [newItem, ...prev.gallery].slice(0, 30) // Ampliada capacidad de galería
     }));
   };
 
@@ -121,7 +122,7 @@ const App: React.FC = () => {
         <h1 className="text-7xl md:text-9xl font-fredoka text-white drop-shadow-2xl relative">
           K-POP <br/> ACADEMY
         </h1>
-        <p className="text-2xl text-white font-bold mt-4 tracking-[0.2em] uppercase drop-shadow-md">Academia Jana</p>
+        <p className="text-2xl text-white font-bold mt-4 tracking-[0.2em] uppercase drop-shadow-md italic">Academia Jana</p>
       </div>
       <button 
         onClick={() => navigateTo('menu')}
@@ -191,7 +192,7 @@ const App: React.FC = () => {
       <div className="flex items-center gap-6 mb-8">
         <IconButton icon="fa-home" onClick={() => navigateTo('menu')} colorClass="bg-gray-400" />
         <div className="flex-grow">
-          <h2 className="text-4xl font-fredoka text-pink-600 uppercase">Misiones de {WARRIORS[selectedModule].name}</h2>
+          <h2 className="text-4xl font-fredoka text-pink-600 uppercase tracking-tighter">Misiones de {WARRIORS[selectedModule].name}</h2>
           <div className="flex items-center gap-4">
              <div className="h-4 w-48 bg-gray-100 rounded-full overflow-hidden border">
                 <div 
@@ -199,7 +200,7 @@ const App: React.FC = () => {
                   style={{width: `${(progress.levelsCompleted.filter(l=>l.startsWith(selectedModule)).length / 60) * 100}%`}}
                 ></div>
              </div>
-             <span className="text-xs font-bold text-pink-400">PASAPORTE AL 100%</span>
+             <span className="text-[10px] font-black text-pink-400 uppercase tracking-widest">Niveles de Sabiduría</span>
           </div>
         </div>
         <IconButton 
@@ -249,12 +250,12 @@ const App: React.FC = () => {
             <IconButton icon="fa-times" onClick={() => navigateTo('levels')} colorClass="bg-white/20" />
             <div className="flex flex-col">
               <h3 className="text-2xl font-fredoka leading-none">{warrior.name}</h3>
-              <p className="text-[10px] font-black opacity-80 uppercase tracking-widest">Nivel {currentLevel.index} de 60</p>
+              <p className="text-[10px] font-black opacity-80 uppercase tracking-widest">Nivel {currentLevel.index} / 60</p>
             </div>
           </div>
           <div className="flex gap-3">
              <div className="hidden md:flex flex-col items-end justify-center mr-4">
-                <span className="text-[10px] font-bold uppercase opacity-80">Total Puntos</span>
+                <span className="text-[10px] font-bold uppercase opacity-80">Puntos Jana</span>
                 <span className="font-fredoka text-xl text-yellow-300 tracking-wider">{progress.totalPoints}</span>
              </div>
              <IconButton 
@@ -273,7 +274,7 @@ const App: React.FC = () => {
             <div className="flex flex-col w-full h-full gap-4">
                <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 p-1 rounded-3xl shadow-lg animate-slide-up">
                   <div className="bg-white p-4 rounded-[1.4rem] text-center">
-                    <span className="text-purple-600 font-black uppercase text-xs tracking-[0.2em] block mb-1">Misión K-Pop de Aura:</span>
+                    <span className="text-purple-600 font-black uppercase text-xs tracking-[0.2em] block mb-1 underline decoration-pink-300">Reto de Arte:</span>
                     <p className="text-xl md:text-3xl font-fredoka text-gray-800 leading-tight">
                       {currentLevel.objective}
                     </p>
@@ -306,31 +307,34 @@ const App: React.FC = () => {
 
                       {/* Herramientas Principales */}
                       <div className="flex md:flex-col gap-2">
-                        <IconButton icon="fa-paint-brush" onClick={() => { sounds.playClick(); setTool('brush'); }} colorClass={tool === 'brush' ? 'bg-pink-500' : 'bg-pink-100 text-pink-400'} />
-                        <IconButton icon="fa-fill-drip" onClick={() => { sounds.playClick(); setTool('fill'); }} colorClass={tool === 'fill' ? 'bg-pink-500' : 'bg-pink-100 text-pink-400'} />
-                        <IconButton icon="fa-eraser" onClick={() => { sounds.playClick(); setTool('eraser'); }} colorClass={tool === 'eraser' ? 'bg-pink-500' : 'bg-pink-100 text-pink-400'} />
+                        <IconButton icon="fa-paint-brush" onClick={() => { sounds.playClick(); setTool('brush'); }} colorClass={tool === 'brush' ? 'bg-pink-500' : 'bg-pink-100 text-pink-400'} label="Lápiz" />
+                        <IconButton icon="fa-fill-drip" onClick={() => { sounds.playClick(); setTool('fill'); }} colorClass={tool === 'fill' ? 'bg-pink-500' : 'bg-pink-100 text-pink-400'} label="Pintura" />
+                        <IconButton icon="fa-eraser" onClick={() => { sounds.playClick(); setTool('eraser'); }} colorClass={tool === 'eraser' ? 'bg-pink-500' : 'bg-pink-100 text-pink-400'} label="Borra" />
                       </div>
 
                       <div className="w-full h-1 bg-pink-100 rounded-full hidden md:block" />
 
                       {/* Selector de Tamaños */}
-                      <div className="flex md:flex-col gap-3 p-2 bg-pink-50 rounded-3xl border-2 border-pink-100">
-                        {[6, 15, 30].map(size => (
-                          <button
-                            key={size}
-                            onClick={() => { sounds.playClick(); setBrushSize(size); }}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${brushSize === size ? 'bg-pink-500 scale-110 shadow-md' : 'bg-white hover:bg-pink-100'}`}
-                          >
-                            <div 
-                              className={`${brushSize === size ? 'bg-white' : 'bg-pink-400'}`} 
-                              style={{ 
-                                width: Math.max(4, size/1.5) + 'px', 
-                                height: Math.max(4, size/1.5) + 'px', 
-                                borderRadius: '50%' 
-                              }} 
-                            />
-                          </button>
-                        ))}
+                      <div className="flex flex-col gap-1 items-center w-full">
+                        <span className="text-[10px] font-black text-pink-400 uppercase mb-1">Tamaño</span>
+                        <div className="flex md:flex-col gap-3 p-2 bg-pink-50 rounded-3xl border-2 border-pink-100">
+                          {[5, 15, 40].map(size => (
+                            <button
+                              key={size}
+                              onClick={() => { sounds.playClick(); setBrushSize(size); }}
+                              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${brushSize === size ? 'bg-pink-500 scale-110 shadow-md' : 'bg-white hover:bg-pink-100'}`}
+                            >
+                              <div 
+                                className={`${brushSize === size ? 'bg-white' : 'bg-pink-400'}`} 
+                                style={{ 
+                                  width: Math.min(24, Math.max(4, size/1.5)) + 'px', 
+                                  height: Math.min(24, Math.max(4, size/1.5)) + 'px', 
+                                  borderRadius: '50%' 
+                                }} 
+                              />
+                            </button>
+                          ))}
+                        </div>
                       </div>
                   </div>
                </div>
@@ -342,8 +346,8 @@ const App: React.FC = () => {
 
         {showCelebration && (
           <div className="absolute inset-0 bg-pink-500/95 flex flex-col items-center justify-center z-50 animate-fade-in text-white text-center p-8">
-            <div className="text-[160px] mb-8 animate-bounce drop-shadow-2xl">✨</div>
-            <h2 className="text-6xl md:text-8xl font-fredoka mb-4 uppercase tracking-tighter shadow-sm">¡GENIAL!</h2>
+            <div className="text-[160px] mb-8 animate-bounce drop-shadow-2xl">🌟</div>
+            <h2 className="text-6xl md:text-8xl font-fredoka mb-4 uppercase tracking-tighter shadow-sm">¡EXCELENTE!</h2>
             <p className="text-2xl md:text-4xl font-bold bg-white/20 px-8 py-4 rounded-3xl backdrop-blur-sm shadow-xl">{celebrationQuote}</p>
           </div>
         )}
@@ -366,7 +370,7 @@ const App: React.FC = () => {
         ) : (
           progress.gallery.map(item => (
             <div key={item.id} className="bg-white p-5 rounded-[2.5rem] shadow-2xl border-4 border-white transform hover:scale-105 transition-all group">
-              <div className="relative overflow-hidden rounded-3xl shadow-inner border">
+              <div className="relative overflow-hidden rounded-3xl shadow-inner border bg-white">
                 <img src={item.dataUrl} alt={item.title} className="w-full h-auto aspect-[4/3] object-cover" />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                    <button 
@@ -385,7 +389,7 @@ const App: React.FC = () => {
               </div>
               <div className="text-center mt-4">
                 <p className="text-xl font-fredoka text-purple-500 truncate">{item.title}</p>
-                <p className="text-xs text-gray-400">{new Date(item.timestamp).toLocaleDateString()}</p>
+                <p className="text-xs text-gray-400 font-bold">{new Date(item.timestamp).toLocaleDateString()}</p>
               </div>
             </div>
           ))
