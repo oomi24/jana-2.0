@@ -1,11 +1,20 @@
-<div align="center">
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+# K-Pop Warriors: Paint & Learn
 
-  <h1>Built with AI Studio</h2>
+Un juego educativo PWA diseñado especialmente para Jana (8 años).
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Características principales
+- **100 Niveles:** Divididos en Color, Forma, Técnica, Composición y Emoción.
+- **Offline First:** Funciona sin internet gracias al Service Worker.
+- **Optimizado para Tablets:** Botones grandes y motor de pintura ligero.
+- **Progreso Local:** Guarda tus estrellas y pinturas en el dispositivo.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## Cómo ejecutar localmente
+1. Clona el repositorio o descarga los archivos.
+2. Abre una terminal en la carpeta raíz.
+3. Ejecuta un servidor local, por ejemplo: `npx serve .` o usa la extensión "Live Server" en VS Code.
+4. Abre `http://localhost:3000` (o el puerto indicado) en el navegador de la tablet.
 
-</div>
+## Créditos
+Diseñado con temática K-Pop para inspirar creatividad y aprendizaje artístico.
+Guerreras: Aura, Beat, Pixel, Luma y Melo.
