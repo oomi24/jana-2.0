@@ -54,17 +54,19 @@ const QuizBoard: React.FC<QuizBoardProps> = ({ level, onCorrect, onWrong }) => {
 
   const renderVisual = () => {
     if (!level.visual) return null;
-    if (level.visual.includes('<svg')) {
+    const visualStr = String(level.visual);
+    
+    if (visualStr.includes('<svg')) {
       return (
         <div 
           className="w-full max-w-[400px] h-48 md:h-64 mx-auto my-4 shadow-2xl border-4 border-white rounded-3xl overflow-hidden bg-white flex items-center justify-center"
-          dangerouslySetInnerHTML={{ __html: level.visual }}
+          dangerouslySetInnerHTML={{ __html: visualStr }}
         />
       );
     }
     return (
-      <div className="text-[120px] md:text-[160px] my-2 animate-bounce-slow drop-shadow-lg flex items-center justify-center">
-        {level.visual}
+      <div className="text-[100px] md:text-[140px] my-2 animate-bounce-slow drop-shadow-lg flex items-center justify-center">
+        {visualStr}
       </div>
     );
   };
@@ -78,11 +80,11 @@ const QuizBoard: React.FC<QuizBoardProps> = ({ level, onCorrect, onWrong }) => {
         
         {level.factCard && (
           <div className="bg-green-50 rounded-3xl p-6 border-2 border-green-200 w-full mb-8 text-left">
-            <h4 className="text-2xl font-fredoka text-green-700 underline mb-2">{level.factCard.title}</h4>
+            <h4 className="text-2xl font-fredoka text-green-700 underline mb-2">{String(level.factCard.title)}</h4>
             <div className="space-y-1">
-               {level.factCard.capital && <p className="text-lg"><strong>Capital:</strong> {level.factCard.capital}</p>}
-               {level.factCard.continent && <p className="text-lg"><strong>Continente:</strong> {level.factCard.continent}</p>}
-               <p className="mt-4 text-xl italic text-green-800">"{level.factCard.curiosity}"</p>
+               {level.factCard.capital && <p className="text-lg"><strong>Capital:</strong> {String(level.factCard.capital)}</p>}
+               {level.factCard.continent && <p className="text-lg"><strong>Continente:</strong> {String(level.factCard.continent)}</p>}
+               <p className="mt-4 text-xl italic text-green-800">"{String(level.factCard.curiosity)}"</p>
             </div>
           </div>
         )}
@@ -118,19 +120,19 @@ const QuizBoard: React.FC<QuizBoardProps> = ({ level, onCorrect, onWrong }) => {
       </div>
 
       <div className="text-center w-full">
-        <h3 className="text-xl md:text-2xl font-fredoka text-purple-500 uppercase tracking-tighter mb-2">{level.objective}</h3>
+        <h3 className="text-xl md:text-2xl font-fredoka text-purple-500 uppercase tracking-tighter mb-2">{String(level.objective)}</h3>
         
         {renderVisual()}
 
         {showHint && level.hints && (
           <div className="bg-yellow-50 text-yellow-700 p-3 rounded-xl border-2 border-yellow-200 mb-4 animate-bounce text-sm font-bold">
-            <i className="fas fa-sparkles mr-2"></i> {level.hints[0]}
+            <i className="fas fa-sparkles mr-2"></i> {String(level.hints[0])}
           </div>
         )}
 
         <div className="bg-purple-50 rounded-3xl border-4 border-purple-100 p-6 mb-6 shadow-inner">
           <p className="text-2xl md:text-3xl font-bold text-gray-800 leading-tight">
-            {level.question}
+            {String(level.question)}
           </p>
         </div>
       </div>
@@ -142,7 +144,7 @@ const QuizBoard: React.FC<QuizBoardProps> = ({ level, onCorrect, onWrong }) => {
             onClick={() => handleSelect(option)}
             className="group relative p-5 text-xl font-bold text-white bg-gradient-to-r from-pink-500 to-purple-500 rounded-3xl shadow-lg hover:scale-105 active:scale-95 transition-all border-b-8 border-purple-700 overflow-hidden"
           >
-            <span className="relative z-10">{option.text}</span>
+            <span className="relative z-10">{String(option.text)}</span>
           </button>
         ))}
       </div>

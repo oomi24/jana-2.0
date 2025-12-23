@@ -1,32 +1,25 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// Credenciales proporcionadas por el usuario
-const supabaseUrl = 'https://cnkmpoahyuoqoxhchiys.supabase.co';
-const supabaseAnonKey = 'sb_publishable_rzXSRWXKdviens7moegqHw_uJ3pBPEb';
+const supabaseUrl = 'https://zqarslebhqqrqidlaruw.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYXJzbGViaHFxcnFpZGxhcnV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyNzUzMTUsImV4cCI6MjA2ODg1MTMxNX0.MpGkiCmNgicHca5_q_4SL6hkSpavtyaVA8qYaX6FbIU';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-/**
- * Función para sincronizar el progreso de Jana con Supabase.
- * Almacena el objeto de progreso completo en la tabla 'user_profiles'.
- */
 export const syncProgress = async (userId: string, progress: any) => {
   if (!supabase) return;
   
   try {
     const { error } = await supabase
-      .from('user_profiles')
+      .from('user_progress')
       .upsert({ 
-        id: userId, 
-        progress_data: progress,
-        last_updated: new Date().toISOString()
-      }, { onConflict: 'id' });
+        user_id: userId, 
+        data: progress,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
 
-    if (error) {
-      console.warn('Error sincronizando con Supabase (posiblemente falta tabla):', error.message);
-    }
+    if (error) console.warn('Supabase Sync Status:', error.message);
   } catch (err) {
-    console.error('Fallo crítico en sincronización:', err);
+    console.error('Supabase connection failed');
   }
 };

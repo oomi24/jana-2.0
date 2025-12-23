@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>K-Pop Warriors: Academy</title>
+    <title>K-Pop Academy: Jana Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             font-family: 'Quicksand', sans-serif;
-            background: #fdf2f8; /* Pink-50 */
+            background: #fdf2f8; 
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             overflow: hidden;
@@ -19,36 +19,28 @@
         .font-fredoka {
             font-family: 'Fredoka One', cursive;
         }
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(-5%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
-          50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+        @keyframes slide-up {
+          from { transform: translateY(20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
-        .animate-bounce-slow {
-          animation: bounce-slow 2s infinite;
-        }
-        /* Custom scrollbar for better tablet experience */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #fbcfe8;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #ec4899;
-            border-radius: 10px;
+        .animate-slide-up {
+          animation: slide-up 0.5s ease-out forwards;
         }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/"
-  }
-}
-</script>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom": "https://esm.sh/react-dom@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "react/": "https://esm.sh/react@18.2.0/",
+        "react-dom/": "https://esm.sh/react-dom@18.2.0/"
+      }
+    }
+    </script>
 </head>
 <body class="m-0 p-0">
     <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>
