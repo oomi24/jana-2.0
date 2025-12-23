@@ -55,26 +55,26 @@ export const WARRIORS: Record<ModuleId, Warrior> = {
 };
 
 const ART_CHALLENGES = [
-  "Dibuja un Sol amarillo.", "Dibuja un Corazón rosa.", "Dibuja una Estrella dorada.", 
-  "Dibuja una Flor de colores.", "Dibuja una Casita pequeña.", "Dibuja un Gatito feliz.", 
-  "Dibuja un Helado de fresa.", "Dibuja un Arcoíris.", "Dibuja una Mariposa.", 
-  "Dibuja una Piruleta redonda.", "Dibuja un Árbol con manzanas.", "Dibuja una Nube sonriente.", 
-  "Dibuja un Pececito azul.", "Dibuja un Globo morado.", "Dibuja una Carita Feliz.", 
-  "Dibuja un Vestido rosa.", "Dibuja una Corona de reina.", "Dibuja un Pastel con velas.", 
-  "Dibuja la Luna blanca.", "Dibuja un Cohete espacial.", "Dibuja un Lápiz de color.", 
-  "Dibuja una Manzana roja.", "Dibuja un Osito de peluche.", "Dibuja un Barquito en el mar.", 
-  "Dibuja una Sombrilla.", "Dibuja una Pelota de playa.", "Dibuja un Sol con gafas.", 
-  "Dibuja una Hoja verde.", "Dibuja un Pollito amarillo.", "Dibuja un Regalo con lazo.", 
-  "Dibuja un Micrófono K-Pop.", "Dibuja una Nota musical.", "Dibuja un Diamante azul.", 
-  "Dibuja una Varita mágica.", "Dibuja un Auricular neón.", "Dibuja un Zapato brillante.", 
-  "Dibuja una Mochila rosa.", "Dibuja un Pincel con pintura.", "Dibuja un Cubo de arena.", 
-  "Dibuja una Galleta rica.", "Dibuja una Fresa roja.", "Dibuja un Plátano amarillo.", 
-  "Dibuja una Sandía verde.", "Dibuja un Gorrito de fiesta.", "Dibuja un Tambor pequeño.", 
-  "Dibuja una Guitarra azul.", "Dibuja un Robot de colores.", "Dibuja un Avión blanco.", 
-  "Dibuja una Bici roja.", "Dibuja un Tren largo.", "Dibuja un Patito de goma.", 
-  "Dibuja un Cubo de juguete.", "Dibuja una Cometa alta.", "Dibuja una Abeja rayada.", 
-  "Dibuja una Mariquita roja.", "Dibuja un Caracol lento.", "Dibuja una Tortuga verde.", 
-  "Dibuja un Conejito blanco.", "Dibuja un Oso Panda.", "Dibuja un Escenario K-Pop."
+  "Dibuja un Micrófono Mágico ✨", "Diseña un Escenario Galáctico 🌌", "Dibuja un Lightstick Brillante 🪄",
+  "Dibuja un Corazón de Fan 💖", "Diseña un Outfit de K-Pop 👗", "Crea un Logo para tu Banda 🎤",
+  "Dibuja un Ticket de Concierto 🎟️", "Dibuja Pelo de Colores K-Pop 🌈", "Diseña Gafas de Estrella ⭐",
+  "Dibuja un Altavoz Potente 🔊", "Crea una Portada de Álbum 📀", "Dibuja una Nota Musical 🎵",
+  "Dibuja un Zapato Neón 👟", "Diseña un Escenario con Humo 💨", "Dibuja una Corona de Idol 👑",
+  "Dibuja un Banner de Apoyo 🚩", "Dibuja una Piruleta Dulce 🍭", "Diseña un Guante con Brillos ✨",
+  "Dibuja un Micrófono de Diadema 🎧", "Dibuja un Diamante de Fama 💎", "Crea un Fondo de Luces LED 💡",
+  "Dibuja una Estrella de Hollywood 🌟", "Diseña un Cinturón con Tachuelas ⛓️", "Dibuja una Falda con Pliegues 👗",
+  "Dibuja una Chaqueta con Parches 🧥", "Crea un Diseño de Uñas Idol 💅", "Dibuja un Refresco de Concierto 🥤",
+  "Dibuja una Cámara de Fotos 📸", "Diseña un Gorro de Peluche 🧸", "Dibuja un Collar con tu Nombre 📿",
+  "Crea un Maquillaje de Ojos con Glitter ✨", "Dibuja un Anillo de Amistad 💍", "Diseña un Pantalón Brillante 👖",
+  "Dibuja una Mochila para Gira 🎒", "Crea un Cartel Lumínico 💡", "Dibuja un Labial de Fresa 💄",
+  "Diseña un Auricular Personalizado 🎧", "Dibuja un Corazón Coreano 🫰", "Crea un Badge de VIP 🏷️",
+  "Dibuja un Oso con Lightstick 🧸", "Diseña una Guitarra Eléctrica 🎸", "Dibuja un Piano de Cristal 🎹",
+  "Crea una Pulsera de Luces ⌚", "Dibuja un Espejo de Camerino 🪞", "Diseña una Puerta de Gira 🚪",
+  "Dibuja un Avión Privado de Idol ✈️", "Crea un Sello de Fanclub 🖨️", "Dibuja un Helado de Galaxia 🍦",
+  "Diseña una Botella de Agua Kawaii 🍼", "Dibuja un Par de Alas de Angel 👼", "Crea un Gato con Capucha 🐱",
+  "Dibuja una Nube con Brillos ☁️", "Diseña un Traje de Espía K-Pop 🕵️‍♀️", "Dibuja un Sol con Coronas ☀️",
+  "Crea un Castillo de Música 🏰", "Dibuja un Zapato de Plataforma 👠", "Diseña un Reloj de Cuenta Atrás ⏰",
+  "Dibuja una Cascada de Notas 🌊", "Crea un Planeta de K-Pop 🪐", "Dibuja tu Retrato de Idol 👩‍🎤"
 ];
 
 const getFlagSVG = (pais: string) => {

@@ -1,5 +1,11 @@
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
+
+interface Path {
+  d: string;
+  color: string;
+  size: number;
+}
 
 interface CanvasBoardProps {
   brushColor: string;
@@ -9,113 +15,90 @@ interface CanvasBoardProps {
 }
 
 const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, onSave }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const contextRef = useRef<CanvasRenderingContext2D | null>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-
-  // Función para ajustar el tamaño del canvas al contenedor
-  const resizeCanvas = () => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
-
-    const { width, height } = container.getBoundingClientRect();
-    
-    // Guardamos el contenido actual para no perderlo al redimensionar
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
-    if (tempCtx) tempCtx.drawImage(canvas, 0, 0);
-
-    // Ajustamos resolución física (DPR) para que se vea nítido en tablets
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.scale(dpr, dpr);
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, width, height);
-      
-      // Restauramos el dibujo previo escalado
-      ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, width, height);
-      contextRef.current = ctx;
-    }
-  };
-
-  useEffect(() => {
-    resizeCanvas();
-    
-    // Escuchar cambios de tamaño en la ventana o rotación de tablet
-    window.addEventListener('resize', resizeCanvas);
-    
-    // Observer para cambios en el contenedor flex
-    const observer = new ResizeObserver(() => resizeCanvas());
-    if (containerRef.current) observer.observe(containerRef.current);
-
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      observer.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (contextRef.current) {
-      contextRef.current.strokeStyle = tool === 'eraser' ? 'white' : brushColor;
-      contextRef.current.lineWidth = brushSize;
-    }
-  }, [brushColor, brushSize, tool]);
+  const [paths, setPaths] = useState<Path[]>([]);
+  const [currentPath, setCurrentPath] = useState<string | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
 
   const getCoordinates = (e: any) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
+    const svg = svgRef.current;
+    if (!svg) return { x: 0, y: 0 };
     
-    const rect = canvas.getBoundingClientRect();
+    const CTM = svg.getScreenCTM();
+    if (!CTM) return { x: 0, y: 0 };
+
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    // Calculamos la posición relativa al tamaño visual del canvas
+
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
+      x: (clientX - CTM.e) / CTM.a,
+      y: (clientY - CTM.f) / CTM.d
     };
   };
 
   const startDrawing = (e: any) => {
     const { x, y } = getCoordinates(e);
-    contextRef.current?.beginPath();
-    contextRef.current?.moveTo(x, y);
-    setIsDrawing(true);
+    setCurrentPath(`M ${x.toFixed(1)} ${y.toFixed(1)}`);
   };
 
   const draw = (e: any) => {
-    if (!isDrawing || !contextRef.current) return;
+    if (currentPath === null) return;
     const { x, y } = getCoordinates(e);
-    contextRef.current.lineTo(x, y);
-    contextRef.current.stroke();
+    setCurrentPath(prev => `${prev} L ${x.toFixed(1)} ${y.toFixed(1)}`);
   };
 
   const endDrawing = () => {
-    if (!isDrawing) return;
-    setIsDrawing(false);
-    contextRef.current?.closePath();
-    if (canvasRef.current) {
-      // Guardamos una versión ligera para la galería
-      onSave(canvasRef.current.toDataURL('image/webp', 0.5));
-    }
+    if (currentPath === null) return;
+    
+    const newPath: Path = {
+      d: currentPath,
+      color: tool === 'eraser' ? 'white' : brushColor,
+      size: brushSize
+    };
+
+    setPaths(prev => [...prev, newPath]);
+    setCurrentPath(null);
+    
+    // Al final de cada trazo, intentamos guardar una imagen para la galería
+    // Usamos un timeout corto para asegurar que el DOM se haya actualizado
+    setTimeout(() => {
+      exportToImage();
+    }, 50);
+  };
+
+  const exportToImage = () => {
+    if (!svgRef.current) return;
+    
+    const svgData = new XMLSerializer().serializeToString(svgRef.current);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    // Obtenemos dimensiones reales
+    const rect = svgRef.current.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = () => {
+      if (ctx) {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        onSave(canvas.toDataURL('image/webp', 0.5));
+      }
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
   };
 
   return (
-    <div ref={containerRef} className="w-full h-full bg-white rounded-[2rem] shadow-2xl overflow-hidden border-8 border-pink-100 cursor-crosshair">
-      <canvas
-        ref={canvasRef}
+    <div className="w-full h-full bg-white rounded-[2rem] shadow-2xl overflow-hidden border-8 border-pink-100 cursor-crosshair relative">
+      <svg
+        ref={svgRef}
+        viewBox="0 0 800 600"
+        preserveAspectRatio="xMidYMid meet"
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={endDrawing}
@@ -123,8 +106,41 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
         onTouchStart={startDrawing}
         onTouchMove={draw}
         onTouchEnd={endDrawing}
-        className="touch-none block"
-      />
+        className="w-full h-full touch-none select-none bg-white"
+      >
+        <rect width="800" height="600" fill="white" />
+        
+        {paths.map((p, i) => (
+          <path
+            key={i}
+            d={p.d}
+            stroke={p.color}
+            strokeWidth={p.size}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        ))}
+
+        {currentPath && (
+          <path
+            d={currentPath}
+            stroke={tool === 'eraser' ? 'white' : brushColor}
+            strokeWidth={brushSize}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        )}
+      </svg>
+
+      {/* Botón rápido para limpiar el lienzo SVG */}
+      <button 
+        onClick={() => setPaths([])}
+        className="absolute bottom-4 right-4 w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-lg border-2 border-red-200 active:scale-90 transition-transform"
+      >
+        <i className="fas fa-trash-alt"></i>
+      </button>
     </div>
   );
 };
