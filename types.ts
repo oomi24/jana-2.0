@@ -43,9 +43,19 @@ export interface Level {
     title: string;
     content: string;
     author: string;
-    vocabulary: string[];
+    vocabulary: { word: string, meaning: string }[];
     objectives: string[];
+    difficulty: number;
+    estimatedTime: string;
     questions: { question: string, options: string[], correct: number }[];
+  };
+  englishData?: {
+    lessonTitle: string;
+    category: string;
+    exerciseType: 'multiple-choice' | 'matching' | 'sentence' | 'vocab';
+    pronunciation?: string;
+    dialogue?: { speaker: string, text: string, translation: string }[];
+    matchingPairs?: { english: string, spanish: string }[];
   };
 }
 
@@ -66,6 +76,11 @@ export interface UserProgress {
   stickers: string[];
   gallery: GalleryItem[];
   totalPoints: number;
+  readingStats?: {
+    wordsRead: number;
+    booksCompleted: number;
+    perfectQuizzes: number;
+  };
   powerUps: {
     doubleXP: number;
     hint: number;
