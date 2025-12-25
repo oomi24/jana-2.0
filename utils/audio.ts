@@ -3,13 +3,31 @@ class SoundManager {
   private ctx: AudioContext | null = null;
   private enabled: boolean = true;
 
-  private init() {
+  public init() {
     if (!this.ctx) {
       this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 44100 });
     }
     if (this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
+  }
+
+  // Método crucial para APKs y Tablets
+  public async unlockAudio() {
+    this.init();
+    if (this.ctx?.state === 'suspended') {
+      await this.ctx.resume();
+    }
+    // Crear un buffer silencioso para "despertar" el motor de audio en Android
+    const buffer = this.ctx!.createBuffer(1, 1, 22050);
+    const node = this.ctx!.createBufferSource();
+    node.buffer = buffer;
+    node.connect(this.ctx!.destination);
+    node.start(0);
+    
+    // También despertar SpeechSynthesis
+    const silence = new SpeechSynthesisUtterance("");
+    window.speechSynthesis.speak(silence);
   }
 
   playClick() {
@@ -68,7 +86,6 @@ class SoundManager {
     });
   }
 
-  // ASMR de lápiz sobre papel
   playPencil() {
     this.init();
     const bufferSize = this.ctx!.sampleRate * 0.05;

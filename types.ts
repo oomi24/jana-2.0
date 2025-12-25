@@ -1,7 +1,7 @@
 
 export type ModuleId = 'color' | 'math' | 'english' | 'geo' | 'science';
 
-export type LevelType = 'paint' | 'quiz' | 'math-master';
+export type LevelType = 'paint' | 'quiz' | 'math-master' | 'lingua-flow';
 
 export type DrawingTool = 'brush' | 'pencil' | 'magic' | 'eraser' | 'fill';
 
@@ -13,6 +13,8 @@ export interface QuizOption {
 export interface FactCard {
   title: string;
   curiosity: string;
+  capital?: string;
+  continent?: string;
 }
 
 export interface Level {
@@ -23,7 +25,9 @@ export interface Level {
   objective: string;
   help: string;
   question?: string;
-  answer?: number;
+  answer?: any;
+  translation?: string;
+  scenario?: string; // 'cafe', 'airport', 'park', etc.
   operation?: 'mult' | 'div' | 'mix';
   visual?: string; 
   options?: QuizOption[];
@@ -54,6 +58,8 @@ export interface UserProgress {
     hint: number;
     extraTime: number;
     autoSolve: number;
+    nativeEar: number;
+    contextVision: number;
   };
 }
 

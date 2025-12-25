@@ -5,6 +5,7 @@ import { WARRIORS, LEVELS, MOTIVATIONAL_QUOTES } from './constants';
 import CanvasBoard from './components/CanvasBoard';
 import QuizBoard from './components/QuizBoard';
 import MathBoard from './components/MathBoard';
+import LinguaBoard from './components/LinguaBoard';
 import IconButton from './components/IconButton';
 import { sounds } from './utils/audio';
 import { syncProgress } from './supabase';
@@ -21,7 +22,7 @@ const App: React.FC = () => {
     stickers: [],
     gallery: [],
     totalPoints: 0,
-    powerUps: { doubleXP: 5, hint: 5, extraTime: 5, autoSolve: 2 }
+    powerUps: { doubleXP: 5, hint: 5, extraTime: 5, autoSolve: 2, nativeEar: 10, contextVision: 10 }
   });
 
   const [brushColor, setBrushColor] = useState('#ec4899');
@@ -30,10 +31,10 @@ const App: React.FC = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationQuote, setCelebrationQuote] = useState("");
 
-  const JANA_ID = 'jana_tablet_user_v7';
+  const JANA_ID = 'jana_tablet_user_v9';
 
   useEffect(() => {
-    const saved = localStorage.getItem('jana_kpop_v7');
+    const saved = localStorage.getItem('jana_kpop_v9');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -43,9 +44,16 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('jana_kpop_v7', JSON.stringify(progress));
+    localStorage.setItem('jana_kpop_v9', JSON.stringify(progress));
     syncProgress(JANA_ID, progress);
   }, [progress]);
+
+  // FUNCIÓN CLAVE PARA AUDIO EN MÓVILES
+  const handleStartApp = async () => {
+    await sounds.unlockAudio(); // Desbloquea AudioContext y Speech
+    sounds.playClick();
+    setScreen('menu');
+  };
 
   const usePowerUp = (type: string): boolean => {
     if ((progress.powerUps as any)[type] > 0) {
@@ -103,20 +111,26 @@ const App: React.FC = () => {
   return (
     <div className="h-[100dvh] w-full overflow-hidden flex flex-col font-quicksand bg-[#fdf2f8]">
       {screen === 'splash' && (
-        <div className="flex-grow flex flex-col items-center justify-center bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600 text-white p-6">
+        <div className="flex-grow flex flex-col items-center justify-center bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600 text-white p-6 relative">
           <div className="mb-6 animate-bounce text-center">
             <i className="fas fa-brain text-7xl md:text-9xl text-yellow-300 drop-shadow-2xl"></i>
-            <p className="font-fredoka text-2xl mt-4 tracking-widest text-pink-200">MATHMASTERS</p>
+            <p className="font-fredoka text-2xl mt-4 tracking-widest text-pink-200">K-POP ACADEMY</p>
           </div>
-          <h1 className="text-5xl md:text-8xl font-fredoka mb-2 text-center leading-tight uppercase tracking-tighter">Cerebro<br/>Numérico</h1>
-          <button onClick={() => { sounds.playClick(); setScreen('menu'); }} className="mt-8 bg-white text-pink-600 px-16 py-6 rounded-full text-3xl font-fredoka shadow-2xl active:scale-95 transition-all">¡JUGAR!</button>
+          <h1 className="text-5xl md:text-8xl font-fredoka mb-2 text-center leading-tight uppercase tracking-tighter">JANA<br/>EDITION</h1>
+          <button 
+            onClick={handleStartApp} 
+            className="mt-8 bg-white text-pink-600 px-16 py-6 rounded-full text-3xl font-fredoka shadow-2xl active:scale-95 transition-all hover:bg-pink-50"
+          >
+            ¡EMPEZAR!
+          </button>
+          <p className="absolute bottom-10 opacity-50 text-[10px] font-bold uppercase tracking-widest">Optimized for Tablets & Sound</p>
         </div>
       )}
 
       {screen === 'menu' && (
         <div className="p-4 md:p-6 flex-grow flex flex-col gap-4 overflow-y-auto">
           <div className="flex justify-between items-center bg-white p-4 rounded-3xl shadow-lg border-b-4 border-pink-100 sticky top-0 z-10">
-             <h2 className="text-xl md:text-2xl font-fredoka text-pink-500">Jana ✨ <span className="text-gray-400 text-xs block font-quicksand">PTS: {progress.totalPoints}</span></h2>
+             <h2 className="text-xl md:text-2xl font-fredoka text-pink-500 uppercase">Super Jana ✨ <span className="text-gray-400 text-xs block font-quicksand">PTS: {progress.totalPoints}</span></h2>
              <div className="flex gap-2">
                 <IconButton icon="fa-paint-brush" onClick={startFreeDraw} colorClass="bg-orange-400" label="Arte" />
                 <IconButton icon="fa-images" onClick={() => setScreen('gallery')} colorClass="bg-purple-50" label="Arte" />
@@ -168,7 +182,15 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex-grow flex flex-col overflow-hidden">
-             {currentLevel.type === 'math-master' ? (
+             {currentLevel.type === 'lingua-flow' ? (
+               <LinguaBoard 
+                 level={currentLevel} 
+                 powerUps={progress.powerUps} 
+                 onCorrect={completeLevel} 
+                 onWrong={() => sounds.playWrong()} 
+                 usePowerUp={usePowerUp} 
+               />
+             ) : currentLevel.type === 'math-master' ? (
                <MathBoard 
                  level={currentLevel} 
                  powerUps={progress.powerUps} 
