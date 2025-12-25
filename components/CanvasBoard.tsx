@@ -37,8 +37,11 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     if (!svg) return { x: 0, y: 0 };
     const CTM = svg.getScreenCTM();
     if (!CTM) return { x: 0, y: 0 };
+    
+    // Soporte para touch y mouse
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
     return {
       x: (clientX - CTM.e) / CTM.a,
       y: (clientY - CTM.f) / CTM.d
@@ -48,7 +51,9 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
   const startDrawing = (e: any) => {
     if (tool === 'fill') {
       setBgColor(brushColor);
-      sounds.playSuccess(); // Sonido de magia al llenar
+      sounds.playSuccess();
+      // Guardar el cambio de fondo
+      setTimeout(() => exportToImage(), 100);
       return;
     }
     const { x, y } = getCoordinates(e);
@@ -88,15 +93,18 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     const ctx = canvas.getContext('2d');
     const img = new Image();
     const rect = svgRef.current.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
+    
+    canvas.width = 800; // Ancho base de la viewBox
+    canvas.height = 600; // Alto base de la viewBox
+    
     const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
+    
     img.onload = () => {
       if (ctx) {
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, 800, 600);
         onSave(canvas.toDataURL('image/webp', 0.5));
       }
       URL.revokeObjectURL(url);
@@ -105,7 +113,7 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
   };
 
   return (
-    <div className="w-full h-full bg-white rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl overflow-hidden border-8 border-pink-200 cursor-crosshair relative">
+    <div className="w-full flex-grow bg-white rounded-[2rem] md:rounded-[3.5rem] shadow-2xl overflow-hidden border-4 md:border-8 border-pink-200 cursor-crosshair relative">
       <svg
         ref={svgRef}
         viewBox="0 0 800 600"
@@ -114,9 +122,10 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
         onMouseMove={draw}
         onMouseUp={endDrawing}
         onMouseLeave={endDrawing}
-        onTouchStart={startDrawing}
-        onTouchMove={draw}
-        onTouchEnd={endDrawing}
+        onTouchStart={(e) => { e.preventDefault(); startDrawing(e); }}
+        onTouchMove={(e) => { e.preventDefault(); draw(e); }}
+        // Fix: Removed unused event argument 'e' from endDrawing() call as it takes 0 arguments
+        onTouchEnd={(e) => { e.preventDefault(); endDrawing(); }}
         className="w-full h-full touch-none select-none"
       >
         <defs>
@@ -135,18 +144,17 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
           </filter>
         </defs>
 
-        {/* Rectángulo de fondo real para el bote de pintura */}
+        {/* Rectángulo de FONDO TOTAL - Esto es lo que pinta el bote de pintura */}
         <rect width="800" height="600" fill={bgColor} style={{ transition: 'fill 0.4s' }} />
 
-        {/* Silueta de guía punteada */}
+        {/* Silueta de guía */}
         {silhouette && silhouette.startsWith('M') && (
           <path 
             d={silhouette} 
             fill="none" 
-            stroke={bgColor === 'white' ? '#f0f0f0' : 'rgba(255,255,255,0.3)'} 
-            strokeWidth="8" 
+            stroke={bgColor === 'white' ? '#f0f0f0' : 'rgba(255,255,255,0.2)'} 
+            strokeWidth="10" 
             strokeDasharray="15,15" 
-            className="animate-pulse"
           />
         )}
         
@@ -178,10 +186,9 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
       <button 
         onClick={() => { sounds.playClick(); setPaths([]); setBgColor('white'); }}
-        className="absolute bottom-8 right-8 w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-xl border-4 border-white active:scale-90 transition-transform"
-        title="Limpiar dibujo"
+        className="absolute bottom-4 right-4 md:bottom-8 md:right-8 w-12 h-12 md:w-16 md:h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-xl border-2 md:border-4 border-white active:scale-90 transition-transform"
       >
-        <i className="fas fa-trash-alt text-2xl"></i>
+        <i className="fas fa-trash-alt text-xl md:text-2xl"></i>
       </button>
     </div>
   );
