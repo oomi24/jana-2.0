@@ -3,13 +3,6 @@ import React, { useRef, useState, useEffect } from 'react';
 import { DrawingTool } from '../types';
 import { sounds } from '../utils/audio';
 
-interface Path {
-  d: string;
-  color: string;
-  size: number;
-  tool: DrawingTool;
-}
-
 interface CanvasBoardProps {
   brushColor: string;
   brushSize: number;
@@ -20,169 +13,199 @@ interface CanvasBoardProps {
 }
 
 const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, silhouette, levelId, onSave }) => {
-  const [paths, setPaths] = useState<Path[]>([]);
-  const [currentPath, setCurrentPath] = useState<string | null>(null);
-  const [bgColor, setBgColor] = useState('white');
-  const svgRef = useRef<SVGSVGElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
+  const [hue, setHue] = useState(0);
 
+  // Inicializar lienzo
   useEffect(() => {
-    setPaths([]);
-    setBgColor('white');
-    setCurrentPath(null);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+
+    // Limpiar para nuevo nivel
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Dibujar silueta como guía suave
+    if (silhouette) {
+      const path = new Path2D(silhouette);
+      ctx.save();
+      ctx.strokeStyle = '#f0f0f0';
+      ctx.lineWidth = 10;
+      ctx.setLineDash([15, 15]);
+      ctx.stroke(path);
+      ctx.restore();
+    }
   }, [levelId, silhouette]);
 
-  const getCoordinates = (e: any) => {
-    const svg = svgRef.current;
-    if (!svg) return { x: 0, y: 0 };
-    const CTM = svg.getScreenCTM();
-    if (!CTM) return { x: 0, y: 0 };
-    
-    // Soporte para touch y mouse
+  const getPos = (e: any) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     return {
-      x: (clientX - CTM.e) / CTM.a,
-      y: (clientY - CTM.f) / CTM.d
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
     };
   };
 
   const startDrawing = (e: any) => {
+    const pos = getPos(e);
     if (tool === 'fill') {
-      setBgColor(brushColor);
-      sounds.playSuccess();
-      setTimeout(() => exportToImage(), 100);
+      handleFloodFill(Math.round(pos.x), Math.round(pos.y));
       return;
     }
-    const { x, y } = getCoordinates(e);
-    setCurrentPath(`M ${x.toFixed(1)} ${y.toFixed(1)}`);
+    setIsDrawing(true);
+    setLastPos(pos);
   };
 
   const draw = (e: any) => {
-    if (currentPath === null) return;
-    const { x, y } = getCoordinates(e);
-    setCurrentPath(prev => `${prev} L ${x.toFixed(1)} ${y.toFixed(1)}`);
+    if (!isDrawing || tool === 'fill') return;
+    const pos = getPos(e);
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
+
+    ctx.beginPath();
+    ctx.moveTo(lastPos.x, lastPos.y);
+    ctx.lineTo(pos.x, pos.y);
+    
+    ctx.shadowBlur = 0; // Reset shadow
+
+    if (tool === 'eraser') {
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = brushSize * 1.5;
+    } else if (tool === 'pencil') {
+      ctx.strokeStyle = brushColor;
+      ctx.lineWidth = Math.max(2, brushSize / 4);
+    } else if (tool === 'magic') {
+      // Efecto Arcoíris
+      const nextHue = (hue + 5) % 360;
+      setHue(nextHue);
+      ctx.strokeStyle = `hsl(${nextHue}, 100%, 50%)`;
+      ctx.lineWidth = brushSize;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = `hsl(${nextHue}, 100%, 50%)`;
+    } else {
+      ctx.strokeStyle = brushColor;
+      ctx.lineWidth = brushSize;
+    }
+
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+    setLastPos(pos);
+    
+    if (Math.random() > 0.9) sounds.playPencil();
   };
 
-  const endDrawing = () => {
-    if (currentPath === null) return;
-    
-    const colorToUse = tool === 'eraser' 
-      ? bgColor 
-      : (tool === 'magic' ? 'url(#rainbowGrad)' : brushColor);
-
-    const newPath: Path = {
-      d: currentPath,
-      color: colorToUse,
-      size: tool === 'pencil' ? Math.max(3, brushSize / 3) : brushSize,
-      tool: tool
-    };
-
-    setPaths(prev => [...prev, newPath]);
-    setCurrentPath(null);
-    
-    setTimeout(() => exportToImage(), 100);
+  const stopDrawing = () => {
+    if (isDrawing) {
+      setIsDrawing(false);
+      saveCanvas();
+    }
   };
 
-  const exportToImage = () => {
-    if (!svgRef.current) return;
-    const svgData = new XMLSerializer().serializeToString(svgRef.current);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
+  const saveCanvas = () => {
+    if (canvasRef.current) {
+      onSave(canvasRef.current.toDataURL('image/webp', 0.6));
+    }
+  };
+
+  const handleFloodFill = (startX: number, startY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    const targetColor = getPixelColor(data, startX, startY, canvas.width);
+    const fillRGB = hexToRgb(brushColor);
     
-    canvas.width = 800; 
-    canvas.height = 600; 
-    
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
-    
-    img.onload = () => {
-      if (ctx) {
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, 800, 600);
-        onSave(canvas.toDataURL('image/webp', 0.5));
+    if (colorsMatch(targetColor, [fillRGB.r, fillRGB.g, fillRGB.b, 255])) return;
+
+    const pixelsToCheck = [[startX, startY]];
+    while (pixelsToCheck.length > 0) {
+      const [x, y] = pixelsToCheck.pop()!;
+      const currentColor = getPixelColor(data, x, y, canvas.width);
+      if (colorsMatch(currentColor, targetColor)) {
+        setPixelColor(data, x, y, canvas.width, fillRGB);
+        if (x > 0) pixelsToCheck.push([x - 1, y]);
+        if (x < canvas.width - 1) pixelsToCheck.push([x + 1, y]);
+        if (y > 0) pixelsToCheck.push([x, y - 1]);
+        if (y < canvas.height - 1) pixelsToCheck.push([x, y + 1]);
       }
-      URL.revokeObjectURL(url);
-    };
-    img.src = url;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    sounds.playSuccess();
+    saveCanvas();
+  };
+
+  const getPixelColor = (data: Uint8ClampedArray, x: number, y: number, width: number) => {
+    const index = (y * width + x) * 4;
+    return [data[index], data[index + 1], data[index + 2], data[index + 3]];
+  };
+
+  const setPixelColor = (data: Uint8ClampedArray, x: number, y: number, width: number, color: {r:number, g:number, b:number}) => {
+    const index = (y * width + x) * 4;
+    data[index] = color.r;
+    data[index + 1] = color.g;
+    data[index + 2] = color.b;
+    data[index + 3] = 255;
+  };
+
+  const colorsMatch = (c1: number[], c2: number[], threshold = 15) => {
+    return Math.abs(c1[0] - c2[0]) <= threshold &&
+           Math.abs(c1[1] - c2[1]) <= threshold &&
+           Math.abs(c1[2] - c2[2]) <= threshold &&
+           Math.abs(c1[3] - c2[3]) <= threshold;
+  };
+
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 0, g: 0, b: 0 };
+  };
+
+  const clearCanvas = () => {
+    const ctx = canvasRef.current?.getContext('2d');
+    if (ctx && canvasRef.current) {
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      sounds.playEraser();
+      saveCanvas();
+    }
   };
 
   return (
     <div className="w-full h-full flex-grow bg-white md:rounded-[2rem] shadow-inner overflow-hidden border-b-2 border-pink-100 cursor-crosshair relative touch-lock">
-      <svg
-        ref={svgRef}
-        viewBox="0 0 800 600"
-        preserveAspectRatio="xMidYMid meet"
+      <canvas
+        ref={canvasRef}
+        width={800}
+        height={600}
         onMouseDown={startDrawing}
         onMouseMove={draw}
-        onMouseUp={endDrawing}
-        onMouseLeave={endDrawing}
+        onMouseUp={stopDrawing}
+        onMouseLeave={stopDrawing}
         onTouchStart={(e) => { e.preventDefault(); startDrawing(e); }}
         onTouchMove={(e) => { e.preventDefault(); draw(e); }}
-        onTouchEnd={(e) => { e.preventDefault(); endDrawing(); }}
-        className="w-full h-full touch-none select-none block"
-      >
-        <defs>
-          <linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#FF0000" />
-            <stop offset="16%" stopColor="#FF7F00" />
-            <stop offset="33%" stopColor="#FFFF00" />
-            <stop offset="50%" stopColor="#00FF00" />
-            <stop offset="66%" stopColor="#0000FF" />
-            <stop offset="83%" stopColor="#4B0082" />
-            <stop offset="100%" stopColor="#9400D3" />
-          </linearGradient>
-          <filter id="magicGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-        </defs>
-
-        <rect width="800" height="600" fill={bgColor} style={{ transition: 'fill 0.4s' }} />
-
-        {silhouette && silhouette.startsWith('M') && (
-          <path 
-            d={silhouette} 
-            fill="none" 
-            stroke={bgColor === 'white' ? '#f5f5f5' : 'rgba(255,255,255,0.2)'} 
-            strokeWidth="12" 
-            strokeDasharray="20,20" 
-          />
-        )}
-        
-        {paths.map((p, i) => (
-          <path
-            key={i}
-            d={p.d}
-            stroke={p.color}
-            strokeWidth={p.size}
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            filter={p.tool === 'magic' ? 'url(#magicGlow)' : undefined}
-          />
-        ))}
-
-        {currentPath && (
-          <path
-            d={currentPath}
-            stroke={tool === 'eraser' ? bgColor : (tool === 'magic' ? 'url(#rainbowGrad)' : brushColor)}
-            strokeWidth={tool === 'pencil' ? Math.max(3, brushSize / 3) : brushSize}
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            filter={tool === 'magic' ? 'url(#magicGlow)' : undefined}
-          />
-        )}
-      </svg>
-
+        onTouchEnd={(e) => { e.preventDefault(); stopDrawing(); }}
+        className="w-full h-full touch-none select-none block object-contain bg-white"
+      />
       <button 
-        onClick={() => { sounds.playClick(); setPaths([]); setBgColor('white'); }}
-        className="absolute bottom-4 right-4 w-10 h-10 md:w-14 md:h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-transform z-30"
+        onClick={clearCanvas}
+        className="absolute bottom-4 right-4 w-12 h-12 md:w-16 md:h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-transform z-30"
       >
-        <i className="fas fa-trash-alt text-lg md:text-xl"></i>
+        <i className="fas fa-trash-alt text-xl"></i>
       </button>
     </div>
   );

@@ -33,6 +33,10 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
   const handleScroll = () => {
     if (!scrollRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    if (scrollHeight === clientHeight) {
+       setScrollPercent(100);
+       return;
+    }
     const winScroll = scrollTop;
     const height = scrollHeight - clientHeight;
     const scrolled = (winScroll / height) * 100;
@@ -74,7 +78,7 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
   return (
     <div className="w-full h-full flex flex-col p-2 md:p-6 bg-[#f0f2f5] overflow-hidden font-quicksand">
       
-      {/* HUD de Estadísticas Superior */}
+      {/* HUD Superior con Botón de Test Directo */}
       <div className="flex flex-wrap justify-center md:justify-between items-center gap-2 mb-4 bg-white/80 backdrop-blur-md p-3 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-gray-100">
          <div className="flex items-center gap-3">
             <div className="relative w-12 h-12 md:w-16 md:h-16">
@@ -92,28 +96,18 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
             </div>
          </div>
 
-         <div className="hidden md:flex gap-4">
-            <div className="text-center px-4 border-r border-gray-100">
-               <p className="text-[8px] font-black text-gray-400 uppercase">Palabras</p>
-               <p className="text-lg font-fredoka text-purple-500">{stats.words}</p>
-            </div>
-            <div className="text-center px-4">
-               <p className="text-[8px] font-black text-gray-400 uppercase">Dificultad</p>
-               <span className={`px-3 py-0.5 rounded-full text-[10px] font-black text-white ${story.difficulty > 3 ? 'bg-red-400' : story.difficulty > 1 ? 'bg-orange-400' : 'bg-green-400'}`}>
-                  LVL {story.difficulty}
-               </span>
-            </div>
-         </div>
-
          <div className="flex gap-2">
+            {currentStep === 'reading' ? (
+              <IconButton icon="fa-tasks" onClick={() => { sounds.playClick(); setCurrentStep('exercises'); }} colorClass="bg-green-500" label="Test" />
+            ) : (
+              <IconButton icon="fa-book-open" onClick={() => { sounds.playClick(); setCurrentStep('reading'); }} colorClass="bg-purple-500" label="Lectura" />
+            )}
             <IconButton icon={isSpeaking ? "fa-stop" : "fa-volume-up"} onClick={handleSpeak} colorClass="bg-blue-500" label="Voz" />
             <IconButton icon="fa-brain" onClick={() => setShowAnalysis(!showAnalysis)} colorClass="bg-orange-400" label="Análisis" />
          </div>
       </div>
 
       <div className="flex-grow flex flex-col lg:flex-row gap-4 overflow-hidden">
-        
-        {/* Cuerpo Principal: Lectura o Ejercicios */}
         <div className="flex-grow flex flex-col bg-white rounded-[2rem] md:rounded-[3.5rem] shadow-xl border-4 md:border-8 border-white overflow-hidden relative">
            <div 
              ref={scrollRef} 
@@ -123,7 +117,7 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
               {currentStep === 'reading' ? (
                 <article className="animate-fade-in max-w-4xl mx-auto">
                    <header className="mb-8 md:mb-12 text-center">
-                      <p className="text-purple-400 font-black text-[10px] md:text-sm uppercase tracking-[0.3em] mb-2">Biblioteca Pro Jana</p>
+                      <p className="text-purple-400 font-black text-[10px] md:text-sm uppercase tracking-[0.3em] mb-2">Biblioteca Jana</p>
                       <h1 className="text-3xl md:text-6xl font-fredoka text-gray-800 leading-tight mb-4">{story.title}</h1>
                       <p className="text-sm md:text-xl text-gray-400 italic">Escrito por {story.author}</p>
                    </header>
@@ -132,12 +126,22 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
                         <p key={i} className="first-letter:text-5xl first-letter:font-fredoka first-letter:text-purple-500 first-letter:mr-2 first-letter:float-left">{p}</p>
                       ))}
                    </div>
+                   
+                   {/* Botón final de lectura para pasar al test */}
+                   <div className="mt-16 flex justify-center pb-12">
+                      <button 
+                        onClick={() => { sounds.playCelebration(); setCurrentStep('exercises'); }}
+                        className="bg-green-500 text-white px-12 py-6 rounded-full font-fredoka text-2xl shadow-xl hover:scale-105 active:scale-95 transition-all border-b-8 border-green-700"
+                      >
+                         ¡YA TERMINÉ! IR AL TEST <i className="fas fa-check-circle ml-2"></i>
+                      </button>
+                   </div>
                 </article>
               ) : (
-                <div className="animate-slide-up space-y-8 md:space-y-12 max-w-4xl mx-auto py-4">
+                <div className="animate-slide-up space-y-8 md:space-y-12 max-w-4xl mx-auto py-4 pb-20">
                    <div className="text-center mb-10">
-                      <h2 className="text-2xl md:text-5xl font-fredoka text-purple-600">Desafío de Análisis</h2>
-                      <p className="text-gray-400 font-bold uppercase text-[10px] md:text-sm tracking-widest">Demuestra tu comprensión lectora</p>
+                      <h2 className="text-2xl md:text-5xl font-fredoka text-purple-600 uppercase">Test de Comprensión</h2>
+                      <p className="text-gray-400 font-bold uppercase text-[10px] md:text-sm tracking-widest">Demuestra lo que aprendiste</p>
                    </div>
                    {story.questions.map((q, qIdx) => (
                      <div key={qIdx} className="bg-purple-50/50 p-6 md:p-10 rounded-[2.5rem] border-2 border-purple-100">
@@ -145,7 +149,7 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
                            <span className="bg-purple-600 text-white w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">{qIdx + 1}</span>
                            {q.question}
                         </p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 ml-0 md:ml-14">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                            {q.options.map((opt, oIdx) => (
                              <button
                                key={oIdx}
@@ -153,8 +157,8 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
                                  const n = [...userAnswers]; n[qIdx] = oIdx; setUserAnswers(n);
                                  sounds.playClick();
                                }}
-                               className={`p-4 md:p-8 rounded-2xl md:rounded-[2rem] text-sm md:text-2xl font-bold transition-all border-b-8 active:scale-95 text-left
-                                 ${userAnswers[qIdx] === oIdx ? 'bg-purple-500 border-purple-700 text-white shadow-xl translate-y-1' : 'bg-white text-purple-600 border-purple-100 hover:bg-white hover:border-purple-200'}`}
+                               className={`p-4 md:p-8 rounded-2xl md:rounded-[2rem] text-left text-sm md:text-2xl font-bold transition-all border-b-8 active:scale-95
+                                 ${userAnswers[qIdx] === oIdx ? 'bg-purple-500 border-purple-700 text-white shadow-xl' : 'bg-white text-purple-600 border-purple-100 hover:bg-white'}`}
                              >
                                {opt}
                              </button>
@@ -162,65 +166,38 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
                         </div>
                      </div>
                    ))}
-                   <div className="py-10">
+                   <div className="mt-8">
                       <button 
                         onClick={checkAnswers}
-                        disabled={userAnswers.length < story.questions.length || userAnswers.includes(undefined as any)}
-                        className="w-full bg-green-500 text-white py-6 md:py-10 rounded-[2rem] md:rounded-[3rem] font-fredoka text-xl md:text-5xl shadow-xl border-b-[12px] border-green-700 active:translate-y-2 active:border-b-4 transition-all disabled:opacity-50 disabled:grayscale"
+                        disabled={userAnswers.length < story.questions.length}
+                        className="w-full bg-green-500 text-white py-6 md:py-10 rounded-[2rem] md:rounded-[3rem] font-fredoka text-xl md:text-5xl shadow-xl border-b-[12px] border-green-700 active:translate-y-2 active:border-b-4 transition-all disabled:opacity-50"
                       >
-                         VERIFICAR ANÁLISIS <i className="fas fa-check-double ml-3"></i>
+                         COMPLETAR MISIÓN <i className="fas fa-trophy ml-3"></i>
                       </button>
                    </div>
                 </div>
               )}
            </div>
-
-           {/* Botón Flotante para cambiar de Modo */}
-           {currentStep === 'reading' && scrollPercent > 80 && (
-             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce-slow">
-                <button 
-                  onClick={() => { sounds.playCelebration(); setCurrentStep('exercises'); }}
-                  className="bg-purple-600 text-white px-10 py-4 rounded-full font-fredoka text-lg md:text-3xl shadow-[0_10px_30px_rgba(147,51,234,0.4)] flex items-center gap-3 border-4 border-white"
-                >
-                   ¡LISTA PARA EL TEST! <i className="fas fa-arrow-right"></i>
-                </button>
-             </div>
-           )}
         </div>
 
-        {/* Panel de Análisis lateral (Solo Escritorio/Tablet) */}
         {showAnalysis && (
           <aside className="w-full lg:w-80 flex flex-col gap-4 animate-fade-in">
              <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-lg border border-gray-100 h-full overflow-y-auto">
                 <h3 className="text-xl font-fredoka text-purple-600 mb-6 border-b pb-2 flex items-center gap-2">
-                   <i className="fas fa-microscope"></i> Laboratorio de Letras
+                   <i className="fas fa-microscope"></i> Laboratorio
                 </h3>
-                
                 <div className="space-y-6">
                    <section>
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Vocabulario Clave</p>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Vocabulario</p>
                       <div className="flex flex-col gap-3">
                          {story.vocabulary.map((v, i) => (
-                           <div key={i} className="group cursor-help">
-                              <p className="text-sm md:text-lg font-bold text-purple-500 group-hover:text-purple-700 transition-colors underline decoration-dotted">{v.word}</p>
-                              <p className="text-[10px] md:text-xs text-gray-500 leading-tight bg-gray-50 p-2 rounded-lg mt-1 border border-gray-100">{v.meaning}</p>
+                           <div key={i}>
+                              <p className="text-sm md:text-lg font-bold text-purple-500 underline decoration-dotted">{v.word}</p>
+                              <p className="text-[10px] md:text-xs text-gray-500 bg-gray-50 p-2 rounded-lg mt-1">{v.meaning}</p>
                            </div>
                          ))}
                       </div>
                    </section>
-
-                   <section className="bg-amber-50 p-4 rounded-2xl border border-amber-100">
-                      <p className="text-[10px] font-black text-amber-500 uppercase mb-2">Tips de Comprensión</p>
-                      <ul className="text-[10px] md:text-xs text-amber-700 space-y-2 list-disc ml-4 font-bold">
-                         {story.objectives.map((o, i) => <li key={i}>{o}</li>)}
-                      </ul>
-                   </section>
-
-                   <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 text-center">
-                      <p className="text-[10px] font-black text-blue-500 uppercase mb-1">Velocidad Estimada</p>
-                      <p className="text-xl font-fredoka text-blue-600">{stats.speed} ppm</p>
-                      <p className="text-[8px] text-blue-400 font-bold">Palabras por minuto</p>
-                   </div>
                 </div>
              </div>
           </aside>
@@ -231,7 +208,6 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e9d5ff; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #d8b4fe; }
       `}</style>
     </div>
   );

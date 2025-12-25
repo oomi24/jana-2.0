@@ -124,27 +124,27 @@ const App: React.FC = () => {
       {screen === 'splash' && (
         <div className="flex-grow flex flex-col items-center justify-center bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600 text-white p-6 relative">
           <div className="mb-6 animate-bounce text-center">
-            <i className="fas fa-atom text-7xl md:text-9xl text-yellow-300 drop-shadow-2xl"></i>
-            <p className="font-fredoka text-2xl mt-4 tracking-widest text-pink-200 uppercase">BioSphere Academy</p>
+            <i className="fas fa-rocket text-7xl md:text-9xl text-yellow-300 drop-shadow-2xl"></i>
+            <p className="font-fredoka text-2xl mt-4 tracking-widest text-pink-200 uppercase">Academia del Aprendizaje</p>
           </div>
-          <h1 className="text-5xl md:text-8xl font-fredoka mb-2 text-center leading-tight uppercase tracking-tighter">JANA<br/>SCIENTIST</h1>
+          <h1 className="text-5xl md:text-8xl font-fredoka mb-2 text-center leading-tight uppercase tracking-tighter">JANA<br/>CIENTÍFICA</h1>
           <button 
             onClick={handleStartApp} 
             className="mt-8 bg-white text-pink-600 px-16 py-6 rounded-full text-3xl font-fredoka shadow-2xl active:scale-95 transition-all hover:bg-pink-50"
           >
-            ¡EXPLORAR!
+            ¡ENTRAR!
           </button>
-          <p className="absolute bottom-10 opacity-50 text-[10px] font-bold uppercase tracking-widest">BioSphere: Despertar Científico</p>
+          <p className="absolute bottom-10 opacity-50 text-[10px] font-bold uppercase tracking-widest">Academia: Despertar de la Curiosidad</p>
         </div>
       )}
 
       {screen === 'menu' && (
         <div className="p-4 md:p-6 flex-grow flex flex-col gap-4 overflow-y-auto">
           <div className="flex justify-between items-center bg-white p-4 rounded-3xl shadow-lg border-b-4 border-pink-100 sticky top-0 z-10">
-             <h2 className="text-xl md:text-2xl font-fredoka text-pink-500 uppercase">Super Jana ✨ <span className="text-gray-400 text-xs block font-quicksand">PTS: {progress.totalPoints}</span></h2>
+             <h2 className="text-xl md:text-2xl font-fredoka text-pink-500 uppercase">Jana Científica ✨ <span className="text-gray-400 text-xs block font-quicksand">PTS: {progress.totalPoints}</span></h2>
              <div className="flex gap-2">
                 <IconButton icon="fa-paint-brush" onClick={startFreeDraw} colorClass="bg-orange-400" label="Arte" />
-                <IconButton icon="fa-images" onClick={() => setScreen('gallery')} colorClass="bg-purple-50" label="Galeria" />
+                <IconButton icon="fa-images" onClick={() => setScreen('gallery')} colorClass="bg-purple-50" label="Galería" />
              </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
