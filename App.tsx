@@ -53,10 +53,18 @@ const App: React.FC = () => {
     syncProgress(JANA_ID, progress);
   }, [progress]);
 
-  const handleStartApp = async () => {
-    await sounds.unlockAudio(); 
-    sounds.playClick();
+  const handleStartApp = () => {
+    // Transición inmediata para evitar bloqueos en APKs
     setScreen('menu');
+    
+    // Inicialización silenciosa del sonido para cumplir con políticas de interacción
+    try {
+      sounds.unlockAudio().then(() => {
+        sounds.playClick();
+      }).catch(err => console.log("Audio unlock issues:", err));
+    } catch (e) {
+      console.log("Audio error suppressed for navigation compatibility");
+    }
   };
 
   const usePowerUp = (type: string): boolean => {
@@ -137,7 +145,7 @@ const App: React.FC = () => {
              <h2 className="text-xl md:text-2xl font-fredoka text-pink-500 uppercase">Super Jana ✨ <span className="text-gray-400 text-xs block font-quicksand">PTS: {progress.totalPoints}</span></h2>
              <div className="flex gap-2">
                 <IconButton icon="fa-paint-brush" onClick={startFreeDraw} colorClass="bg-orange-400" label="Arte" />
-                <IconButton icon="fa-images" onClick={() => setScreen('gallery')} colorClass="bg-purple-50" label="Arte" />
+                <IconButton icon="fa-images" onClick={() => setScreen('gallery')} colorClass="bg-purple-50" label="Galeria" />
              </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
