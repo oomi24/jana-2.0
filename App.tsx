@@ -8,6 +8,7 @@ import MathBoard from './components/MathBoard';
 import LinguaBoard from './components/LinguaBoard';
 import ScienceBoard from './components/ScienceBoard';
 import GeoBoard from './components/GeoBoard';
+import ReadingBoard from './components/ReadingBoard';
 import IconButton from './components/IconButton';
 import { sounds } from './utils/audio';
 import { syncProgress } from './supabase';
@@ -146,7 +147,7 @@ const App: React.FC = () => {
                 <IconButton icon="fa-images" onClick={() => setScreen('gallery')} colorClass="bg-purple-50" label="Galeria" />
              </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
             {Object.values(WARRIORS).map(w => (
               <div key={w.id} onClick={() => { sounds.playClick(); setSelectedModule(w.id); setScreen('levels'); }} 
                 className={`p-6 rounded-[2.5rem] bg-gradient-to-br ${w.gradient} text-white cursor-pointer hover:scale-[1.02] active:scale-95 transition-all shadow-xl h-44 flex flex-col justify-between border-4 border-white/20 relative overflow-hidden group`}>
@@ -194,7 +195,9 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex-grow flex flex-col overflow-hidden relative">
-             {currentLevel.moduleId === 'geo' ? (
+             {currentLevel.moduleId === 'reading' ? (
+               <ReadingBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} />
+             ) : currentLevel.moduleId === 'geo' ? (
                <GeoBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} />
              ) : currentLevel.type === 'science-lab' ? (
                <ScienceBoard level={currentLevel} powerUps={progress.powerUps} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} usePowerUp={usePowerUp} />

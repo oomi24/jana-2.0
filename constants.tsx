@@ -6,8 +6,36 @@ export const WARRIORS: Record<ModuleId, Warrior> = {
   math: { id: 'math', name: 'TECH', title: 'MathMaster', subject: 'Matemáticas', color: '#8b5cf6', gradient: 'from-violet-400 to-purple-700', description: 'Domina los números.', icon: 'fa-calculator' },
   english: { id: 'english', name: 'LINGUA', title: 'Guerrera Bilingüe', subject: 'Inglés Inmersivo', color: '#3b82f6', gradient: 'from-blue-400 to-indigo-700', description: 'Domina el inglés.', icon: 'fa-language' },
   geo: { id: 'geo', name: 'GEO', title: 'Guerrera del Mundo', subject: 'Geografía', color: '#fbbf24', gradient: 'from-amber-300 to-yellow-600', description: 'Explora el mapa.', icon: 'fa-globe-americas' },
+  reading: { id: 'reading', name: 'LECTOR', title: 'Guerrera de las Letras', subject: 'Lectura y Análisis', color: '#9c27b0', gradient: 'from-fuchsia-400 to-purple-800', description: 'Explora historias.', icon: 'fa-book-open' },
   science: { id: 'science', name: 'NATURA', title: 'Guerrera Natural', subject: 'Ciencias', color: '#10b981', gradient: 'from-emerald-400 to-teal-600', description: 'Descubre la ciencia.', icon: 'fa-leaf' },
 };
+
+export const READING_DATABASE = [
+  {
+    title: "El Conejo Veloz",
+    author: "Ana María",
+    content: "Había una vez un conejo muy veloz llamado Saltarín. Vivía en un bosque verde y frondoso. Cada mañana, Saltarín corría por el bosque para saludar a sus amigos.\n\nUn día, encontró a la tortuga Tranquila caminando lentamente. '¡Hola, Tranquila!' dijo Saltarín. '¿Por qué caminas tan despacio?'\n\nLa tortuga respondió: 'Me gusta disfrutar del camino. ¿Quieres caminar conmigo?'\n\nSaltarín pensó que sería aburrido, pero decidió acompañarla. Descubrió flores que nunca había visto y escuchó el canto de pájaros nuevos. Aprendió que a veces, ir despacio tiene sus ventajas.",
+    vocabulary: ["veloz", "frondoso", "paciencia", "ventajas"],
+    objectives: ["Identificar personajes", "Secuencia de eventos"],
+    questions: [
+      { question: "¿Cómo se llama el conejo?", options: ["Tranquila", "Saltarín", "Rápido", "Bunny"], correct: 1 },
+      { question: "¿Qué animal caminaba lentamente?", options: ["El conejo", "La tortuga", "El pájaro", "El zorro"], correct: 1 },
+      { question: "¿Qué aprendió el conejo?", options: ["A correr más rápido", "A ser paciente", "A saltar más alto", "A esconderse"], correct: 1 }
+    ]
+  },
+  {
+    title: "La Isla del Tesoro",
+    author: "Luis Pérez",
+    content: "María y su hermano Pedro encontraron un mapa antiguo en el ático de su abuela. El mapa mostraba una isla misteriosa con una X roja. '¡Es un tesoro!' exclamó Pedro.\n\nPrepararon su mochila con agua, comida y una brújula. Tomaron el bote de su abuelo y navegaron hacia la isla. El viaje fue emocionante, con delfines saltando alrededor del bote.\n\nAl llegar a la isla, siguieron el mapa hasta una cueva. Dentro, encontraron un cofre viejo. ¡Estaba lleno de libros antiguos y cartas de su bisabuelo! El verdadero tesoro era la historia de su familia.",
+    vocabulary: ["ático", "brújula", "misteriosa", "bisabuelo"],
+    objectives: ["Seguir instrucciones", "Inferir significados"],
+    questions: [
+      { question: "¿Dónde encontraron el mapa?", options: ["En la playa", "En el ático", "En la escuela", "En el bosque"], correct: 1 },
+      { question: "¿Qué había en el cofre?", options: ["Oro y joyas", "Libros y cartas", "Dulces", "Juguetes"], correct: 1 },
+      { question: "¿Qué era el verdadero tesoro?", options: ["El oro", "La historia familiar", "La isla", "El bote"], correct: 1 }
+    ]
+  }
+];
 
 export const VENEZUELA_STATES = [
   { name: "Amazonas", capital: "Puerto Ayacucho", region: "Guayana", fact: "Estado más grande, hogar del Salto Ángel.", icon: "fa-tree" },
@@ -51,13 +79,14 @@ const SILHOUETTES = [
 
 export const LEVELS: Level[] = (() => {
   const levels: Level[] = [];
-  const modules: ModuleId[] = ['color', 'math', 'english', 'geo', 'science'];
+  const modules: ModuleId[] = ['color', 'math', 'english', 'geo', 'reading', 'science'];
   
   modules.forEach(mod => {
     let max = 60;
     if (mod === 'math') max = 100;
     if (mod === 'english') max = 130;
     if (mod === 'geo') max = 100;
+    if (mod === 'reading') max = 80;
     if (mod === 'science') max = 120;
 
     for (let i = 1; i <= max; i++) {
@@ -65,8 +94,16 @@ export const LEVELS: Level[] = (() => {
       let obj = "", ques = "", ans: any = 0, hints = ["¡Tú puedes!"], visual = "", trans = "", scene = "default";
       let options: QuizOption[] = [];
       let factCard: any = null;
+      let readingData: any = null;
 
-      if (mod === 'geo') {
+      if (mod === 'reading') {
+        type = 'reading-adventure';
+        const dataIndex = (i - 1) % READING_DATABASE.length;
+        const story = READING_DATABASE[dataIndex];
+        obj = "Aventuras Literarias";
+        ques = story.title;
+        readingData = story;
+      } else if (mod === 'geo') {
         const stateIndex = (i - 1) % VENEZUELA_STATES.length;
         const state = VENEZUELA_STATES[stateIndex];
         const isQuiz = i % 2 !== 0;
@@ -86,7 +123,7 @@ export const LEVELS: Level[] = (() => {
             .map(c => ({ text: c, isCorrect: c === state.capital }));
           factCard = { title: state.name, capital: state.capital, continent: "América del Sur", curiosity: state.fact };
         } else {
-          type = 'quiz'; // Placeholder para geo-interactive si se añade
+          type = 'quiz';
           obj = "Sabiduría Regional";
           ques = `¿Qué estado es conocido como: "${state.fact.split(',')[0]}"?`;
           ans = state.name;
@@ -94,7 +131,6 @@ export const LEVELS: Level[] = (() => {
           visual = state.icon;
         }
       } else if (mod === 'color') {
-        // ... (resto del código de color igual)
         const isQuiz = i % 2 !== 0;
         if (isQuiz) {
           type = 'quiz';
@@ -117,7 +153,6 @@ export const LEVELS: Level[] = (() => {
         const pick = words[i % words.length];
         obj = "English Time"; ques = pick.en; trans = pick.es; visual = pick.img; ans = [pick.en];
       } else if (mod === 'science') {
-        // ... (código de ciencia igual)
         type = 'science-lab';
         obj = "Expedición Científica";
       }
@@ -125,7 +160,7 @@ export const LEVELS: Level[] = (() => {
       levels.push({
         id: `${mod}_${i}`, moduleId: mod, type, index: i, objective: obj, help: "Resuelve el desafío.",
         question: ques, answer: ans, translation: trans, scenario: scene, rewardId: `r_${i}`, hints, visual, options,
-        factCard
+        factCard, readingData
       });
     }
   });

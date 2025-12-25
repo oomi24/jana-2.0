@@ -1,7 +1,7 @@
 
-export type ModuleId = 'color' | 'math' | 'english' | 'geo' | 'science';
+export type ModuleId = 'color' | 'math' | 'english' | 'geo' | 'science' | 'reading';
 
-export type LevelType = 'paint' | 'quiz' | 'math-master' | 'lingua-flow' | 'science-lab';
+export type LevelType = 'paint' | 'quiz' | 'math-master' | 'lingua-flow' | 'science-lab' | 'reading-adventure';
 
 export type DrawingTool = 'brush' | 'pencil' | 'magic' | 'eraser' | 'fill';
 
@@ -38,6 +38,14 @@ export interface Level {
     category: 'mineral' | 'plant' | 'animal' | 'micro' | 'space';
     discoveries: string[];
     hiddenItems: { id: string, label: string, x: number, y: number, icon: string }[];
+  };
+  readingData?: {
+    title: string;
+    content: string;
+    author: string;
+    vocabulary: string[];
+    objectives: string[];
+    questions: { question: string, options: string[], correct: number }[];
   };
 }
 
