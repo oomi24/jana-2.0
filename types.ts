@@ -3,6 +3,8 @@ export type ModuleId = 'color' | 'math' | 'english' | 'geo' | 'science';
 
 export type LevelType = 'paint' | 'quiz' | 'map';
 
+export type DrawingTool = 'brush' | 'pencil' | 'magic' | 'eraser' | 'fill' | 'rect' | 'circle';
+
 export interface QuizOption {
   text: string;
   isCorrect: boolean;

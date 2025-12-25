@@ -54,68 +54,40 @@ export const WARRIORS: Record<ModuleId, Warrior> = {
   },
 };
 
+// Siluetas para guiar el dibujo
+const SILHOUETTES: Record<string, string> = {
+  microphone: "M400 100 C350 100 350 250 350 250 L350 450 C350 480 450 480 450 450 L450 250 C450 250 450 100 400 100 Z M350 250 H450",
+  heart: "M400 500 C100 350 100 100 400 250 C700 100 700 350 400 500 Z",
+  star: "M400 50 L480 250 L700 250 L520 380 L580 580 L400 460 L220 580 L280 380 L100 250 L320 250 Z",
+  lightstick: "M400 50 C300 50 300 250 400 250 C500 250 500 50 400 50 Z M380 250 L380 550 L420 550 L420 250 Z",
+  diamond: "M400 50 L700 250 L400 550 L100 250 Z",
+  crown: "M100 500 L100 200 L250 350 L400 150 L550 350 L700 200 L700 500 Z",
+  cat: "M400 500 C300 500 250 450 250 350 C250 250 300 200 400 200 C500 200 550 250 550 350 C550 450 500 500 400 500 Z M270 230 L230 150 L330 200 Z M530 230 L570 150 L470 200 Z",
+  flower: "M400 300 C400 200 500 200 500 300 C500 400 400 400 400 300 Z M400 300 C300 300 300 200 400 200 Z M400 300 C400 400 300 400 300 300 Z M400 300 C500 300 500 400 400 400 Z"
+};
+
 const ART_CHALLENGES = [
-  "Dibuja un Micrófono Mágico ✨", "Diseña un Escenario Galáctico 🌌", "Dibuja un Lightstick Brillante 🪄",
-  "Dibuja un Corazón de Fan 💖", "Diseña un Outfit de K-Pop 👗", "Crea un Logo para tu Banda 🎤",
-  "Dibuja un Ticket de Concierto 🎟️", "Dibuja Pelo de Colores K-Pop 🌈", "Diseña Gafas de Estrella ⭐",
-  "Dibuja un Altavoz Potente 🔊", "Crea una Portada de Álbum 📀", "Dibuja una Nota Musical 🎵",
-  "Dibuja un Zapato Neón 👟", "Diseña un Escenario con Humo 💨", "Dibuja una Corona de Idol 👑",
-  "Dibuja un Banner de Apoyo 🚩", "Dibuja una Piruleta Dulce 🍭", "Diseña un Guante con Brillos ✨",
-  "Dibuja un Micrófono de Diadema 🎧", "Dibuja un Diamante de Fama 💎", "Crea un Fondo de Luces LED 💡",
-  "Dibuja una Estrella de Hollywood 🌟", "Diseña un Cinturón con Tachuelas ⛓️", "Dibuja una Falda con Pliegues 👗",
-  "Dibuja una Chaqueta con Parches 🧥", "Crea un Diseño de Uñas Idol 💅", "Dibuja un Refresco de Concierto 🥤",
-  "Dibuja una Cámara de Fotos 📸", "Diseña un Gorro de Peluche 🧸", "Dibuja un Collar con tu Nombre 📿",
-  "Crea un Maquillaje de Ojos con Glitter ✨", "Dibuja un Anillo de Amistad 💍", "Diseña un Pantalón Brillante 👖",
-  "Dibuja una Mochila para Gira 🎒", "Crea un Cartel Lumínico 💡", "Dibuja un Labial de Fresa 💄",
-  "Diseña un Auricular Personalizado 🎧", "Dibuja un Corazón Coreano 🫰", "Crea un Badge de VIP 🏷️",
-  "Dibuja un Oso con Lightstick 🧸", "Diseña una Guitarra Eléctrica 🎸", "Dibuja un Piano de Cristal 🎹",
-  "Crea una Pulsera de Luces ⌚", "Dibuja un Espejo de Camerino 🪞", "Diseña una Puerta de Gira 🚪",
-  "Dibuja un Avión Privado de Idol ✈️", "Crea un Sello de Fanclub 🖨️", "Dibuja un Helado de Galaxia 🍦",
-  "Diseña una Botella de Agua Kawaii 🍼", "Dibuja un Par de Alas de Angel 👼", "Crea un Gato con Capucha 🐱",
-  "Dibuja una Nube con Brillos ☁️", "Diseña un Traje de Espía K-Pop 🕵️‍♀️", "Dibuja un Sol con Coronas ☀️",
-  "Crea un Castillo de Música 🏰", "Dibuja un Zapato de Plataforma 👠", "Diseña un Reloj de Cuenta Atrás ⏰",
-  "Dibuja una Cascada de Notas 🌊", "Crea un Planeta de K-Pop 🪐", "Dibuja tu Retrato de Idol 👩‍🎤"
+  { text: "Dibuja un Micrófono Mágico ✨", sil: "microphone" },
+  { text: "Dibuja un Corazón de Fan 💖", sil: "heart" },
+  { text: "Dibuja un Lightstick Brillante 🪄", sil: "lightstick" },
+  { text: "Dibuja una Estrella de Idol ⭐", sil: "star" },
+  { text: "Dibuja un Diamante de Fama 💎", sil: "diamond" },
+  { text: "Dibuja la Corona de la Reina 👑", sil: "crown" },
+  { text: "Dibuja un Gatito K-Pop 🐱", sil: "cat" },
+  { text: "Dibuja una Flor de Escenario 🌸", sil: "flower" },
+  { text: "Diseña un Escenario Galáctico 🌌", sil: "" },
+  { text: "Diseña un Outfit de K-Pop 👗", sil: "" }
 ];
 
 const getFlagSVG = (pais: string) => {
   const common = 'width="100%" height="100%" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" style="display:block; border-radius:8px; border:4px solid #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"';
   switch(pais) {
-    case "Argentina": return `<svg ${common}><rect width="900" height="200" fill="#75AADB"/><rect y="200" width="900" height="200" fill="#FFFFFF"/><rect y="400" width="900" height="200" fill="#75AADB"/><circle cx="450" cy="300" r="60" fill="#FFD700"/></svg>`;
-    case "Brasil": return `<svg ${common}><rect width="900" height="600" fill="#009B3A"/><path d="M450 50 L850 300 L450 550 L50 300 Z" fill="#FEDF00"/><circle cx="450" cy="300" r="130" fill="#002776"/></svg>`;
-    case "Canadá": return `<svg ${common}><rect width="225" height="600" fill="#FF0000"/><rect x="225" width="450" height="600" fill="#FFFFFF"/><rect x="675" width="225" height="600" fill="#FF0000"/><path d="M450 150 L470 250 L550 250 L480 320 L510 400 L450 350 L390 400 L420 320 L350 250 L430 250 Z" fill="#FF0000"/></svg>`;
-    case "Francia": return `<svg ${common}><rect width="300" height="600" fill="#002395"/><rect x="300" width="300" height="600" fill="#FFFFFF"/><rect x="600" width="300" height="600" fill="#ED2939"/></svg>`;
-    case "Alemania": return `<svg ${common}><rect width="900" height="200" fill="#000000"/><rect y="200" width="900" height="200" fill="#FF0000"/><rect y="400" width="900" height="200" fill="#FFCC00"/></svg>`;
-    case "Italia": return `<svg ${common}><rect width="300" height="600" fill="#008C45"/><rect x="300" width="300" height="600" fill="#F4F5F0"/><rect x="600" width="300" height="600" fill="#CD212A"/></svg>`;
-    case "Japón": return `<svg ${common}><rect width="900" height="600" fill="#FFFFFF"/><circle cx="450" cy="300" r="180" fill="#BC002D"/></svg>`;
-    case "México": return `<svg ${common}><rect width="300" height="600" fill="#006847"/><rect x="300" width="300" height="600" fill="#FFFFFF"/><rect x="600" width="300" height="600" fill="#CE1126"/><circle cx="450" cy="300" r="50" fill="#8B4513"/></svg>`;
-    case "Reino Unido": return `<svg ${common}><rect width="900" height="600" fill="#00247D"/><path d="M0 0 L900 600 M900 0 L0 600" stroke="#FFFFFF" stroke-width="60"/><path d="M0 0 L900 600 M900 0 L0 600" stroke="#CF142B" stroke-width="20"/><path d="M450 0 V600 M0 300 H900" stroke="#FFFFFF" stroke-width="100"/><path d="M450 0 V600 M0 300 H900" stroke="#CF142B" stroke-width="60"/></svg>`;
-    case "Estados Unidos": return `<svg ${common}><rect width="900" height="600" fill="#FFFFFF"/><rect width="900" height="46" y="0" fill="#B22234"/><rect width="900" height="46" y="92" fill="#B22234"/><rect width="900" height="46" y="184" fill="#B22234"/><rect width="900" height="46" y="276" fill="#B22234"/><rect width="900" height="46" y="368" fill="#B22234"/><rect width="900" height="46" y="460" fill="#B22234"/><rect width="900" height="46" y="552" fill="#B22234"/><rect width="360" height="323" fill="#3C3B6E"/></svg>`;
-    case "España": return `<svg ${common}><rect width="900" height="150" fill="#AA151B"/><rect y="150" width="900" height="300" fill="#F1BF00"/><rect y="450" width="900" height="150" fill="#AA151B"/><circle cx="250" cy="300" r="40" fill="#AA151B"/></svg>`;
-    case "China": return `<svg ${common}><rect width="900" height="600" fill="#EE1C25"/><path d="M150 150 L170 210 L230 210 L180 250 L200 310 L150 270 L100 310 L120 250 L70 210 L130 210 Z" fill="#FFFF00"/></svg>`;
-    case "India": return `<svg ${common}><rect width="900" height="200" fill="#FF9933"/><rect y="200" width="900" height="200" fill="#FFFFFF"/><rect y="400" width="900" height="200" fill="#138808"/><circle cx="450" cy="300" r="80" fill="none" stroke="#000080" stroke-width="5"/></svg>`;
-    case "Corea del Sur": return `<svg ${common}><rect width="900" height="600" fill="#FFFFFF"/><circle cx="450" cy="300" r="150" fill="#CD2E3A"/><path d="M450 300 A75 75 0 0 1 450 450 A75 75 0 0 0 450 300 Z" fill="#0047A0"/></svg>`;
     case "Venezuela": return `<svg ${common}><rect width="900" height="200" fill="#ffcc00"/><rect y="200" width="900" height="200" fill="#0033cc"/><rect y="400" width="900" height="200" fill="#cf142b"/><circle cx="450" cy="380" r="140" fill="none" /></svg>`;
+    case "Corea del Sur": return `<svg ${common}><rect width="900" height="600" fill="#FFFFFF"/><circle cx="450" cy="300" r="150" fill="#CD2E3A"/><path d="M450 300 A75 75 0 0 1 450 450 A75 75 0 0 0 450 300 Z" fill="#0047A0"/></svg>`;
+    case "Argentina": return `<svg ${common}><rect width="900" height="200" fill="#75AADB"/><rect y="200" width="900" height="200" fill="#FFFFFF"/><rect y="400" width="900" height="200" fill="#75AADB"/><circle cx="450" cy="300" r="60" fill="#FFD700"/></svg>`;
     default: return `<svg ${common}><rect width="900" height="600" fill="#ccc"/></svg>`;
   }
 };
-
-const BANDERAS_INFO = [
-  { pais: "Argentina", colores: ["azul celeste", "blanco", "amarillo"], desc: "Sol amarillo en el centro" },
-  { pais: "Brasil", colores: ["verde", "amarillo", "azul", "blanco"], desc: "Fondo verde con rombo amarillo" },
-  { pais: "Canadá", colores: ["rojo", "blanco"], desc: "Hoja de arce roja" },
-  { pais: "Francia", colores: ["azul", "blanco", "rojo"], desc: "Tres franjas verticales" },
-  { pais: "Alemania", colores: ["negro", "rojo", "amarillo"], desc: "Tres franjas horizontales" },
-  { pais: "Italia", colores: ["verde", "blanco", "rojo"], desc: "Tres franjas verticales" },
-  { pais: "Japón", colores: ["blanco", "rojo"], desc: "Círculo rojo en el centro" },
-  { pais: "México", colores: ["verde", "blanco", "rojo"], desc: "Escudo nacional en el centro" },
-  { pais: "Reino Unido", colores: ["azul", "rojo", "blanco"], desc: "Union Jack" },
-  { pais: "Estados Unidos", colores: ["rojo", "blanco", "azul"], desc: "50 estrellas blancas" },
-  { pais: "España", colores: ["rojo", "amarillo"], desc: "Franja amarilla más ancha" },
-  { pais: "China", colores: ["rojo", "amarillo"], desc: "Cinco estrellas amarillas" },
-  { pais: "India", colores: ["azafrán", "blanco", "verde"], desc: "Rueda azul en el centro" },
-  { pais: "Corea del Sur", colores: ["blanco", "rojo", "azul"], desc: "Símbolo Yin-Yang" },
-  { pais: "Venezuela", colores: ["amarillo", "azul", "rojo"], desc: "8 estrellas blancas" }
-];
 
 export const LEVELS: Level[] = (() => {
   const levels: Level[] = [];
@@ -132,76 +104,33 @@ export const LEVELS: Level[] = (() => {
 
       if (mod === 'color') {
         type = 'paint';
-        objective = String(ART_CHALLENGES[i-1] || `Dibuja algo lindo (Nivel ${i})`);
+        const challenge = ART_CHALLENGES[(i-1) % ART_CHALLENGES.length];
+        objective = String(challenge.text);
+        visual = challenge.sil ? SILHOUETTES[challenge.sil] : "";
       } else if (mod === 'math') {
-        let correct: number;
-        if (i <= 30) { 
-          const a = Math.floor((i-1)/3) + 2;
-          const b = (i % 9) + 1;
-          correct = a * b;
-          objective = "Multiplicación Ninja";
-          question = `${a} × ${b} = ?`;
-        } else { 
-          const res = Math.floor((i-31)/3) + 2;
-          const div = (i % 5) + 2;
-          correct = res;
-          objective = "División de Guerrera";
-          question = `${res * div} ÷ ${div} = ?`;
-        }
-        const uniqueOptions = new Set<number>([correct]);
-        while(uniqueOptions.size < 4) {
-           const fake = correct + (Math.floor(Math.random() * 10) - 5);
-           if (fake >= 0 && fake !== correct) uniqueOptions.add(fake);
-           else uniqueOptions.add(correct + uniqueOptions.size + 1);
-        }
-        options = Array.from(uniqueOptions).map(val => ({
-          text: String(val),
-          isCorrect: val === correct
-        })).sort(() => Math.random() - 0.5);
+        let a = Math.floor((i-1)/5) + 2;
+        let b = (i % 5) + 1;
+        let correct = a * b;
+        objective = "Multiplicación Ninja";
+        question = `${a} × ${b} = ?`;
+        options = [correct, correct+2, correct-1, correct+5].map(v => ({ text: String(v), isCorrect: v === correct })).sort(() => Math.random() - 0.5);
       } else if (mod === 'english') {
         objective = "English Academy";
-        const vocabulary = [
-          { en: "Hello", es: "Hola", v: "👋" }, { en: "Pink", es: "Rosado", v: "🩷" },
-          { en: "School", es: "Escuela", v: "🏫" }, { en: "Sister", es: "Hermana", v: "👧" },
-          { en: "Sun", es: "Sol", v: "☀️" }, { en: "Dance", es: "Baila", v: "💃" }
-        ];
-        const item = vocabulary[(i - 1) % vocabulary.length];
-        question = `¿Qué significa "${item.en}"?`;
-        visual = item.v;
-        options = [
-          { text: item.es, isCorrect: true },
-          { text: "Comida", isCorrect: false },
-          { text: "Correr", isCorrect: false },
-          { text: "Avión", isCorrect: false }
-        ].sort(() => Math.random() - 0.5);
+        const engWords = [{en: "Apple", es: "Manzana", icon: "🍎"}, {en: "Dog", es: "Perro", icon: "🐶"}, {en: "Star", es: "Estrella", icon: "⭐"}];
+        const word = engWords[(i-1)%engWords.length];
+        question = `¿Cómo se dice "${word.en}" en español?`;
+        visual = word.icon;
+        options = [{text: word.es, isCorrect: true}, {text: "Gato", isCorrect: false}].sort(() => Math.random() - 0.5);
       } else if (mod === 'geo') {
         objective = "Geografía";
-        const item = BANDERAS_INFO[(i - 1) % BANDERAS_INFO.length];
-        question = `¿De qué país es esta bandera?`;
-        visual = getFlagSVG(item.pais);
-        options = [
-          { text: item.pais, isCorrect: true },
-          { text: "Italia", isCorrect: false },
-          { text: "España", isCorrect: false },
-          { text: "Japón", isCorrect: false }
-        ].sort(() => Math.random() - 0.5).map(o => o.text === item.pais && !o.isCorrect ? {text: "Perú", isCorrect: false} : o);
-        factCard = { title: item.pais, curiosity: item.desc };
+        question = "¿Qué bandera es esta?";
+        visual = getFlagSVG("Venezuela");
+        options = [{text: "Venezuela", isCorrect: true}, {text: "Colombia", isCorrect: false}].sort(() => Math.random() - 0.5);
       } else {
         objective = "Ciencias";
-        const scienceQ = [
-          { q: "¿Qué animal vuela?", a: "Pájaro", v: "🐦" },
-          { q: "¿Color de las plantas?", a: "Verde", v: "🌿" },
-          { q: "¿Qué brilla de día?", a: "Sol", v: "☀️" }
-        ];
-        const item = scienceQ[(i - 1) % scienceQ.length];
-        question = item.q;
-        visual = item.v;
-        options = [
-          { text: item.a, isCorrect: true },
-          { text: "Piedra", isCorrect: false },
-          { text: "Agua", isCorrect: false },
-          { text: "Nube", isCorrect: false }
-        ].sort(() => Math.random() - 0.5);
+        question = "¿Qué parte es?";
+        visual = "🧠";
+        options = [{text: "Cerebro", isCorrect: true}, {text: "Corazón", isCorrect: false}].sort(() => Math.random() - 0.5);
       }
 
       levels.push({
@@ -210,13 +139,13 @@ export const LEVELS: Level[] = (() => {
         type,
         index: i,
         objective: String(objective),
-        help: "¡Tú puedes!",
+        help: "¡Tú puedes Jana!",
         question: String(question),
         visual: String(visual),
         options,
         factCard,
         rewardId: `sticker_${mod}_${i}`,
-        hints: ["¡Mira bien!"]
+        hints: ["¡Usa tu magia!"]
       });
     }
   });
@@ -227,5 +156,7 @@ export const MOTIVATIONAL_QUOTES = [
   "¡Increíble estilo K-Pop!",
   "¡Tu cerebro brilla como una estrella!",
   "¡Eres una verdadera guerrera!",
-  "¡Nivel superado!"
+  "¡Nivel superado con éxito!",
+  "¡Jana, eres la mejor artista!",
+  "¡Tus dibujos son mágicos!"
 ];
