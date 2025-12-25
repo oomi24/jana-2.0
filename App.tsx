@@ -7,6 +7,7 @@ import QuizBoard from './components/QuizBoard';
 import MathBoard from './components/MathBoard';
 import LinguaBoard from './components/LinguaBoard';
 import ScienceBoard from './components/ScienceBoard';
+import GeoBoard from './components/GeoBoard';
 import IconButton from './components/IconButton';
 import { sounds } from './utils/audio';
 import { syncProgress } from './supabase';
@@ -54,7 +55,6 @@ const App: React.FC = () => {
   }, [progress]);
 
   const handleStartApp = () => {
-    // Transición inmediata para evitar bloqueos en APKs
     setScreen('menu');
     try {
       sounds.unlockAudio().then(() => {
@@ -182,7 +182,6 @@ const App: React.FC = () => {
 
       {screen === 'game' && currentLevel && (
         <div className="flex-grow flex flex-col overflow-hidden h-full relative">
-          {/* Header del Juego */}
           <div className="p-2 bg-white/90 backdrop-blur-md flex justify-between items-center border-b-2 border-pink-50 z-20 flex-shrink-0">
             <IconButton icon="fa-arrow-left" onClick={() => setScreen('levels')} colorClass="bg-gray-400" />
             <div className="text-center flex-grow px-2 overflow-hidden">
@@ -194,9 +193,10 @@ const App: React.FC = () => {
             {currentLevel.type !== 'paint' && <div className="w-12 md:w-14"></div>}
           </div>
 
-          {/* Área Principal de Juego */}
           <div className="flex-grow flex flex-col overflow-hidden relative">
-             {currentLevel.type === 'science-lab' ? (
+             {currentLevel.moduleId === 'geo' ? (
+               <GeoBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} />
+             ) : currentLevel.type === 'science-lab' ? (
                <ScienceBoard level={currentLevel} powerUps={progress.powerUps} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} usePowerUp={usePowerUp} />
              ) : currentLevel.type === 'lingua-flow' ? (
                <LinguaBoard level={currentLevel} powerUps={progress.powerUps} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} usePowerUp={usePowerUp} />
@@ -208,10 +208,8 @@ const App: React.FC = () => {
                      <CanvasBoard brushColor={brushColor} brushSize={brushSize} tool={tool} silhouette={currentLevel.visual} levelId={currentLevel.id} onSave={saveToGallery} />
                   </div>
                   
-                  {/* BARRA DE OPCIONES DE PINTURA MEJORADA */}
                   <div className="bg-white border-t-4 border-pink-100 flex flex-col gap-1 md:gap-3 flex-shrink-0 safe-bottom">
                     <div className="flex flex-col p-2 md:p-4 gap-2">
-                       {/* Selector de Colores (Scroll Horizontal) */}
                        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar px-1">
                           {COLORS.map(c => (
                             <button key={c} onClick={() => { setBrushColor(c); setTool('brush'); sounds.playClick(); }}
@@ -221,7 +219,6 @@ const App: React.FC = () => {
                           ))}
                        </div>
                        
-                       {/* Selector de Herramientas */}
                        <div className="flex justify-between items-center bg-gray-50 p-2 rounded-2xl md:rounded-3xl border border-gray-100 shadow-inner">
                           <div className="flex gap-1 md:gap-4">
                              <IconButton icon="fa-brush" onClick={() => setTool('brush')} colorClass={tool === 'brush' ? 'bg-pink-500' : 'bg-white !text-gray-400'} label="Pincel" />
@@ -230,7 +227,6 @@ const App: React.FC = () => {
                              <IconButton icon="fa-eraser" onClick={() => setTool('eraser')} colorClass={tool === 'eraser' ? 'bg-blue-400' : 'bg-white !text-gray-400'} label="Goma" />
                           </div>
                           
-                          {/* Slider de Tamaño Compacto */}
                           <div className="flex flex-col items-center gap-1 px-2">
                              <input 
                                type="range" 
