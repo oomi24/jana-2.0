@@ -131,35 +131,34 @@ const MathBoard: React.FC<MathBoardProps> = ({ level, powerUps, onCorrect, onWro
   };
 
   return (
-    <div className="w-full h-full flex flex-col md:flex-row gap-2 md:gap-4 p-2 md:p-4 bg-[#f8f9fa] overflow-hidden touch-lock animate-slide-up">
+    <div className="w-full h-full flex flex-col md:flex-row gap-1 md:gap-4 p-1 md:p-4 bg-[#f8f9fa] overflow-hidden touch-lock animate-slide-up">
       
       {/* Área de Pizarra Digital */}
-      <div className={`flex-1 min-h-0 flex flex-col relative bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl border-2 md:border-4 transition-all overflow-hidden ${activeDoubleXP ? 'border-blue-400' : 'border-gray-100'}`} 
-           style={{ backgroundImage: 'radial-gradient(#e5e7eb 1.2px, transparent 1.2px)', backgroundSize: '20px 20px' }}>
+      <div className={`flex-1 min-h-[150px] flex flex-col relative bg-white rounded-[1.5rem] md:rounded-[3rem] shadow-2xl border-2 md:border-4 transition-all overflow-hidden ${activeDoubleXP ? 'border-blue-400' : 'border-gray-100'}`} 
+           style={{ backgroundImage: 'radial-gradient(#e5e7eb 1.2px, transparent 1.2px)', backgroundSize: '15px 15px' }}>
         
-        <div className="px-4 py-2 border-b border-dashed border-gray-100 flex justify-between items-center bg-gray-50/50 z-20">
+        <div className="px-3 py-1.5 border-b border-dashed border-gray-100 flex justify-between items-center bg-gray-50/50 z-20">
           <div className="flex items-center gap-2">
              <div className={`w-2 h-2 rounded-full ${timeLeft < 15 ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`}></div>
-             <span className="font-fredoka text-gray-400 text-[9px] md:text-xs uppercase tracking-widest">Pad Jana v.3</span>
+             <span className="font-fredoka text-gray-400 text-[8px] md:text-xs uppercase tracking-widest">Digital Paper</span>
           </div>
-          <button onClick={clearCanvas} className="text-red-400 font-black text-[8px] md:text-[10px] uppercase bg-red-50 px-3 py-1 rounded-full active:scale-90 transition-transform">
+          <button onClick={clearCanvas} className="text-red-400 font-black text-[8px] md:text-[10px] uppercase bg-red-50 px-3 py-1 rounded-full">
              <i className="fas fa-eraser mr-1"></i> Borrar
           </button>
         </div>
         
         <div ref={containerRef} className="flex-1 relative cursor-crosshair touch-none">
-          {/* Operación Matemática Ajustada */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 p-4">
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 p-2">
              <div className="text-center w-full">
-                <h3 className="text-gray-200 text-sm md:text-2xl font-bold uppercase mb-2 md:mb-4 tracking-widest opacity-40 select-none truncate">{level.objective}</h3>
-                <div className="text-6xl sm:text-8xl md:text-[10rem] lg:text-[12rem] font-fredoka text-gray-800 leading-none select-none tracking-tighter transition-all break-words">
+                <h3 className="text-gray-200 text-xs md:text-2xl font-bold uppercase mb-1 md:mb-4 tracking-widest opacity-40 select-none truncate">{level.objective}</h3>
+                <div className="text-5xl sm:text-7xl md:text-8xl lg:text-[10rem] font-fredoka text-gray-800 leading-none select-none tracking-tighter break-words">
                    {level.question}
                 </div>
              </div>
           </div>
 
           {hintMessage && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-400 text-white px-4 py-2 rounded-xl shadow-xl font-bold text-sm md:text-lg animate-bounce border-2 border-white">
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 bg-yellow-400 text-white px-3 py-1 rounded-xl shadow-xl font-bold text-xs md:text-lg animate-bounce border-2 border-white">
               💡 {hintMessage}
             </div>
           )}
@@ -176,52 +175,47 @@ const MathBoard: React.FC<MathBoardProps> = ({ level, powerUps, onCorrect, onWro
           />
         </div>
 
-        {/* Barra de Tiempo Integrada */}
-        <div className="h-1.5 bg-gray-100 w-full overflow-hidden">
+        <div className="h-1 bg-gray-100 w-full overflow-hidden">
            <div className={`h-full transition-all duration-1000 ${timeLeft < 15 ? 'bg-red-500' : 'bg-purple-500'}`} style={{ width: `${(timeLeft / 60) * 100}%` }} />
         </div>
       </div>
 
       {/* Controles y Teclado Compacto */}
-      <div className="w-full md:w-64 lg:w-72 flex flex-col gap-2 md:gap-4 flex-shrink-0">
-        
-        {/* Entrada y Keypad */}
-        <div className="bg-white p-2 md:p-4 rounded-[1.5rem] md:rounded-[2.5rem] shadow-xl border-2 md:border-4 border-purple-100">
-           <div className={`text-3xl md:text-5xl font-fredoka py-2 md:py-4 bg-gray-50 rounded-xl md:rounded-[2rem] w-full text-center border-b-4 md:border-b-8 mb-2 md:mb-4 transition-all ${input ? 'text-purple-600 border-purple-200' : 'text-gray-200 border-gray-100'}`}>
+      <div className="w-full md:w-64 lg:w-72 flex flex-col gap-1 md:gap-4 flex-shrink-0">
+        <div className="bg-white p-1.5 md:p-4 rounded-[1.2rem] md:rounded-[2.5rem] shadow-xl border-2 md:border-4 border-purple-100 flex flex-col">
+           <div className={`text-2xl md:text-5xl font-fredoka py-1 md:py-4 bg-gray-50 rounded-lg md:rounded-[2rem] w-full text-center border-b-2 md:border-b-8 mb-1.5 md:mb-4 ${input ? 'text-purple-600 border-purple-200' : 'text-gray-200 border-gray-100'}`}>
               {input || "?"}
            </div>
            
            <div className="grid grid-cols-3 gap-1 md:gap-2">
               {[1,2,3,4,5,6,7,8,9].map(n => (
                 <button key={n} onClick={() => { sounds.playClick(); if(input.length < 5) setInput(prev => prev + n); }}
-                  className="bg-purple-50 active:bg-purple-200 p-3 md:p-4 rounded-xl md:rounded-2xl font-fredoka text-xl md:text-2xl text-purple-600 border-b-2 md:border-b-4 border-purple-100 active:translate-y-0.5 transition-all"
+                  className="bg-purple-50 active:bg-purple-200 p-2 md:p-4 rounded-lg md:rounded-2xl font-fredoka text-lg md:text-2xl text-purple-600 border-b-2 md:border-b-4 border-purple-100"
                 >{n}</button>
               ))}
-              <button onClick={() => setInput('')} className="bg-red-50 text-red-500 p-3 md:p-4 rounded-xl md:rounded-2xl font-black text-[9px] md:text-xs uppercase border-b-2 md:border-b-4 border-red-100">DEL</button>
+              <button onClick={() => setInput('')} className="bg-red-50 text-red-500 p-2 md:p-4 rounded-lg md:rounded-2xl font-black text-[8px] md:text-xs uppercase border-b-2 border-red-100">DEL</button>
               <button onClick={() => { sounds.playClick(); if(input.length < 5) setInput(prev => prev + '0'); }}
-                className="bg-purple-50 active:bg-purple-200 p-3 md:p-4 rounded-xl md:rounded-2xl font-fredoka text-xl md:text-2xl text-purple-600 border-b-2 md:border-b-4 border-purple-100"
+                className="bg-purple-50 active:bg-purple-200 p-2 md:p-4 rounded-lg md:rounded-2xl font-fredoka text-lg md:text-2xl text-purple-600 border-b-2 border-purple-100"
               >0</button>
-              <button onClick={handleSubmit} className="bg-green-500 text-white p-3 md:p-4 rounded-xl md:rounded-2xl font-black text-lg md:text-xl border-b-2 md:border-b-4 border-green-700 active:scale-95 flex items-center justify-center shadow-lg">
+              <button onClick={handleSubmit} className="bg-green-500 text-white p-2 md:p-4 rounded-lg md:rounded-2xl font-black text-lg md:text-xl border-b-2 border-green-700 active:scale-95 shadow-lg">
                  <i className="fas fa-paper-plane"></i>
               </button>
            </div>
         </div>
 
-        {/* Power-ups Compactos */}
-        <div className="bg-white p-2 md:p-4 rounded-[1.5rem] md:rounded-[2.5rem] shadow-xl border-2 md:border-4 border-yellow-100">
-           <div className="grid grid-cols-4 md:grid-cols-2 gap-1.5 md:gap-3">
+        <div className="bg-white p-1.5 md:p-4 rounded-[1.2rem] md:rounded-[2.5rem] shadow-xl border-2 md:border-4 border-yellow-100">
+           <div className="flex md:grid md:grid-cols-2 gap-1.5 md:gap-3 overflow-x-auto no-scrollbar">
              {[
                { id: 'doubleXP', icon: 'fa-bolt', color: 'blue', label: '2X' },
                { id: 'hint', icon: 'fa-lightbulb', color: 'yellow', label: '?' },
-               { id: 'extraTime', icon: 'fa-clock', color: 'green', label: '+20s' },
+               { id: 'extraTime', icon: 'fa-clock', color: 'green', label: '+20' },
                { id: 'autoSolve', icon: 'fa-magic', color: 'purple', label: 'AUTO' }
              ].map(pw => (
-               // Fixed: Use 'powerUps' prop directly instead of missing 'progress' object.
                <button key={pw.id} onClick={() => handleUsePowerUp(pw.id)} disabled={powerUps[pw.id] <= 0}
-                 className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all relative ${powerUps[pw.id] > 0 ? `bg-${pw.color}-50 border-b-2 border-${pw.color}-200` : 'opacity-30 grayscale pointer-events-none'}`}
+                 className={`flex-shrink-0 flex flex-col items-center justify-center p-1.5 md:p-3 rounded-lg md:rounded-xl transition-all relative ${powerUps[pw.id] > 0 ? `bg-${pw.color}-50 border-b-2 border-${pw.color}-200` : 'opacity-30 grayscale pointer-events-none'}`}
                >
-                  <i className={`fas ${pw.icon} text-sm md:text-xl mb-0.5 text-${pw.color}-500`}></i>
-                  <span className="text-[7px] md:text-[9px] font-black uppercase text-gray-500">{pw.label}</span>
+                  <i className={`fas ${pw.icon} text-xs md:text-xl mb-0.5 text-${pw.color}-500`}></i>
+                  <span className="text-[6px] md:text-[9px] font-black uppercase text-gray-500">{pw.label}</span>
                   <span className="absolute -top-1 -right-1 bg-gray-800 text-white text-[7px] md:text-[9px] font-bold px-1.5 py-0.5 rounded-full border border-white">
                     {powerUps[pw.id]}
                   </span>
@@ -230,8 +224,7 @@ const MathBoard: React.FC<MathBoardProps> = ({ level, powerUps, onCorrect, onWro
            </div>
         </div>
 
-        {/* HUD de tiempo inferior para móviles */}
-        <div className={`${timeLeft < 15 ? 'bg-red-500' : 'bg-gray-800'} text-white py-1.5 md:py-3 rounded-xl md:rounded-2xl text-center font-fredoka text-sm md:text-xl shadow-lg transition-colors`}>
+        <div className={`${timeLeft < 15 ? 'bg-red-500' : 'bg-gray-800'} text-white py-1.5 md:py-3 rounded-lg md:rounded-2xl text-center font-fredoka text-xs md:text-xl shadow-lg transition-colors`}>
            <i className="fas fa-hourglass-half mr-2"></i> {timeLeft}s
         </div>
       </div>

@@ -56,15 +56,11 @@ const App: React.FC = () => {
   const handleStartApp = () => {
     // Transición inmediata para evitar bloqueos en APKs
     setScreen('menu');
-    
-    // Inicialización silenciosa del sonido para cumplir con políticas de interacción
     try {
       sounds.unlockAudio().then(() => {
         sounds.playClick();
       }).catch(err => console.log("Audio unlock issues:", err));
-    } catch (e) {
-      console.log("Audio error suppressed for navigation compatibility");
-    }
+    } catch (e) {}
   };
 
   const usePowerUp = (type: string): boolean => {
@@ -111,7 +107,7 @@ const App: React.FC = () => {
   };
 
   const startFreeDraw = () => {
-    const freeLevel: Level = { id: 'free_draw', moduleId: 'color', type: 'paint', index: 0, objective: "🎨 LIBRE", help: "", rewardId: "free" };
+    const freeLevel: Level = { id: 'free_draw', moduleId: 'color', type: 'paint', index: 0, objective: "🎨 ARTE LIBRE", help: "", rewardId: "free" };
     setCurrentLevel(freeLevel); setScreen('game');
   };
 
@@ -119,6 +115,8 @@ const App: React.FC = () => {
     const newItem = { id: Date.now().toString(), timestamp: Date.now(), dataUrl, title: String(currentLevel?.objective || 'Mi Arte') };
     setProgress(prev => ({ ...prev, gallery: [newItem, ...prev.gallery].slice(0, 40) }));
   };
+
+  const COLORS = ['#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#000000', '#ffffff'];
 
   return (
     <div className="h-[100dvh] w-full overflow-hidden flex flex-col font-quicksand bg-[#fdf2f8]">
@@ -183,50 +181,70 @@ const App: React.FC = () => {
       )}
 
       {screen === 'game' && currentLevel && (
-        <div className="flex-grow flex flex-col overflow-hidden h-full">
-          <div className="p-2 bg-white flex justify-between items-center border-b-2 border-pink-50 flex-shrink-0">
+        <div className="flex-grow flex flex-col overflow-hidden h-full relative">
+          {/* Header del Juego */}
+          <div className="p-2 bg-white/90 backdrop-blur-md flex justify-between items-center border-b-2 border-pink-50 z-20 flex-shrink-0">
             <IconButton icon="fa-arrow-left" onClick={() => setScreen('levels')} colorClass="bg-gray-400" />
-            <div className="text-center flex-grow px-4 overflow-hidden">
-               <h3 className="text-xs md:text-sm font-black text-purple-600 truncate uppercase tracking-widest">{currentLevel.objective}</h3>
+            <div className="text-center flex-grow px-2 overflow-hidden">
+               <h3 className="text-[10px] md:text-sm font-black text-purple-600 truncate uppercase tracking-widest">{currentLevel.objective}</h3>
             </div>
-            {currentLevel.type === 'paint' && <IconButton icon="fa-check" onClick={() => completeLevel()} colorClass="bg-green-500" label="LISTO" />}
-            {currentLevel.type !== 'paint' && <div className="w-12"></div>}
+            {currentLevel.type === 'paint' && (
+              <IconButton icon="fa-check" onClick={() => completeLevel()} colorClass="bg-green-500" label="LISTO" />
+            )}
+            {currentLevel.type !== 'paint' && <div className="w-12 md:w-14"></div>}
           </div>
 
-          <div className="flex-grow flex flex-col overflow-hidden">
+          {/* Área Principal de Juego */}
+          <div className="flex-grow flex flex-col overflow-hidden relative">
              {currentLevel.type === 'science-lab' ? (
-               <ScienceBoard 
-                 level={currentLevel} 
-                 powerUps={progress.powerUps} 
-                 onCorrect={completeLevel} 
-                 onWrong={() => sounds.playWrong()} 
-                 usePowerUp={usePowerUp} 
-               />
+               <ScienceBoard level={currentLevel} powerUps={progress.powerUps} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} usePowerUp={usePowerUp} />
              ) : currentLevel.type === 'lingua-flow' ? (
-               <LinguaBoard 
-                 level={currentLevel} 
-                 powerUps={progress.powerUps} 
-                 onCorrect={completeLevel} 
-                 onWrong={() => sounds.playWrong()} 
-                 usePowerUp={usePowerUp} 
-               />
+               <LinguaBoard level={currentLevel} powerUps={progress.powerUps} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} usePowerUp={usePowerUp} />
              ) : currentLevel.type === 'math-master' ? (
-               <MathBoard 
-                 level={currentLevel} 
-                 powerUps={progress.powerUps} 
-                 onCorrect={completeLevel} 
-                 onWrong={() => sounds.playWrong()} 
-                 usePowerUp={usePowerUp} 
-               />
+               <MathBoard level={currentLevel} powerUps={progress.powerUps} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} usePowerUp={usePowerUp} />
              ) : currentLevel.type === 'paint' ? (
-               <CanvasBoard 
-                 brushColor={brushColor} 
-                 brushSize={brushSize} 
-                 tool={tool} 
-                 silhouette={currentLevel.visual} 
-                 levelId={currentLevel.id} 
-                 onSave={saveToGallery} 
-               />
+               <div className="flex-grow flex flex-col h-full">
+                  <div className="flex-grow relative overflow-hidden">
+                     <CanvasBoard brushColor={brushColor} brushSize={brushSize} tool={tool} silhouette={currentLevel.visual} levelId={currentLevel.id} onSave={saveToGallery} />
+                  </div>
+                  
+                  {/* BARRA DE OPCIONES DE PINTURA MEJORADA */}
+                  <div className="bg-white border-t-4 border-pink-100 flex flex-col gap-1 md:gap-3 flex-shrink-0 safe-bottom">
+                    <div className="flex flex-col p-2 md:p-4 gap-2">
+                       {/* Selector de Colores (Scroll Horizontal) */}
+                       <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar px-1">
+                          {COLORS.map(c => (
+                            <button key={c} onClick={() => { setBrushColor(c); setTool('brush'); sounds.playClick(); }}
+                              className={`w-10 h-10 md:w-14 md:h-14 rounded-full border-4 transition-all flex-shrink-0 ${brushColor === c && tool !== 'eraser' ? 'border-pink-500 scale-110 shadow-lg' : 'border-white shadow-sm'}`}
+                              style={{ backgroundColor: c }}
+                            />
+                          ))}
+                       </div>
+                       
+                       {/* Selector de Herramientas */}
+                       <div className="flex justify-between items-center bg-gray-50 p-2 rounded-2xl md:rounded-3xl border border-gray-100 shadow-inner">
+                          <div className="flex gap-1 md:gap-4">
+                             <IconButton icon="fa-brush" onClick={() => setTool('brush')} colorClass={tool === 'brush' ? 'bg-pink-500' : 'bg-white !text-gray-400'} label="Pincel" />
+                             <IconButton icon="fa-magic" onClick={() => setTool('magic')} colorClass={tool === 'magic' ? 'bg-purple-500' : 'bg-white !text-gray-400'} label="Magia" />
+                             <IconButton icon="fa-fill-drip" onClick={() => setTool('fill')} colorClass={tool === 'fill' ? 'bg-orange-500' : 'bg-white !text-gray-400'} label="Balde" />
+                             <IconButton icon="fa-eraser" onClick={() => setTool('eraser')} colorClass={tool === 'eraser' ? 'bg-blue-400' : 'bg-white !text-gray-400'} label="Goma" />
+                          </div>
+                          
+                          {/* Slider de Tamaño Compacto */}
+                          <div className="flex flex-col items-center gap-1 px-2">
+                             <input 
+                               type="range" 
+                               min="10" max="100" 
+                               value={brushSize} 
+                               onChange={(e) => setBrushSize(parseInt(e.target.value))}
+                               className="w-20 md:w-32 accent-pink-500 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer" 
+                             />
+                             <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Grosor</span>
+                          </div>
+                       </div>
+                    </div>
+                  </div>
+               </div>
              ) : (
                <QuizBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} />
              )}

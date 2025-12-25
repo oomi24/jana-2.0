@@ -110,7 +110,7 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
   };
 
   return (
-    <div className="w-full flex-grow bg-white rounded-[2rem] md:rounded-[3.5rem] shadow-2xl overflow-hidden border-4 md:border-8 border-pink-200 cursor-crosshair relative touch-lock">
+    <div className="w-full h-full flex-grow bg-white md:rounded-[2rem] shadow-inner overflow-hidden border-b-2 border-pink-100 cursor-crosshair relative touch-lock">
       <svg
         ref={svgRef}
         viewBox="0 0 800 600"
@@ -122,7 +122,7 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
         onTouchStart={(e) => { e.preventDefault(); startDrawing(e); }}
         onTouchMove={(e) => { e.preventDefault(); draw(e); }}
         onTouchEnd={(e) => { e.preventDefault(); endDrawing(); }}
-        className="w-full h-full touch-none select-none"
+        className="w-full h-full touch-none select-none block"
       >
         <defs>
           <linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -146,9 +146,9 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
           <path 
             d={silhouette} 
             fill="none" 
-            stroke={bgColor === 'white' ? '#f0f0f0' : 'rgba(255,255,255,0.2)'} 
-            strokeWidth="10" 
-            strokeDasharray="15,15" 
+            stroke={bgColor === 'white' ? '#f5f5f5' : 'rgba(255,255,255,0.2)'} 
+            strokeWidth="12" 
+            strokeDasharray="20,20" 
           />
         )}
         
@@ -180,9 +180,9 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
       <button 
         onClick={() => { sounds.playClick(); setPaths([]); setBgColor('white'); }}
-        className="absolute bottom-4 right-4 md:bottom-8 md:right-8 w-12 h-12 md:w-16 md:h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center shadow-xl border-2 md:border-4 border-white active:scale-90 transition-transform"
+        className="absolute bottom-4 right-4 w-10 h-10 md:w-14 md:h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-transform z-30"
       >
-        <i className="fas fa-trash-alt text-xl md:text-2xl"></i>
+        <i className="fas fa-trash-alt text-lg md:text-xl"></i>
       </button>
     </div>
   );
