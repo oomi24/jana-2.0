@@ -1,7 +1,7 @@
 
 export type ModuleId = 'color' | 'math' | 'english' | 'geo' | 'science';
 
-export type LevelType = 'paint' | 'quiz' | 'math-master' | 'lingua-flow';
+export type LevelType = 'paint' | 'quiz' | 'math-master' | 'lingua-flow' | 'science-lab';
 
 export type DrawingTool = 'brush' | 'pencil' | 'magic' | 'eraser' | 'fill';
 
@@ -27,13 +27,18 @@ export interface Level {
   question?: string;
   answer?: any;
   translation?: string;
-  scenario?: string; // 'cafe', 'airport', 'park', etc.
+  scenario?: string; 
   operation?: 'mult' | 'div' | 'mix';
   visual?: string; 
   options?: QuizOption[];
   factCard?: FactCard;
   rewardId: string;
   hints?: string[];
+  scientificData?: {
+    category: 'mineral' | 'plant' | 'animal' | 'micro' | 'space';
+    discoveries: string[];
+    hiddenItems: { id: string, label: string, x: number, y: number, icon: string }[];
+  };
 }
 
 export interface Warrior {
@@ -60,6 +65,8 @@ export interface UserProgress {
     autoSolve: number;
     nativeEar: number;
     contextVision: number;
+    darwinLens: number;
+    timeWarp: number;
   };
 }
 

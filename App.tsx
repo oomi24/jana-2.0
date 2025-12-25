@@ -6,6 +6,7 @@ import CanvasBoard from './components/CanvasBoard';
 import QuizBoard from './components/QuizBoard';
 import MathBoard from './components/MathBoard';
 import LinguaBoard from './components/LinguaBoard';
+import ScienceBoard from './components/ScienceBoard';
 import IconButton from './components/IconButton';
 import { sounds } from './utils/audio';
 import { syncProgress } from './supabase';
@@ -22,7 +23,11 @@ const App: React.FC = () => {
     stickers: [],
     gallery: [],
     totalPoints: 0,
-    powerUps: { doubleXP: 5, hint: 5, extraTime: 5, autoSolve: 2, nativeEar: 10, contextVision: 10 }
+    powerUps: { 
+      doubleXP: 5, hint: 5, extraTime: 5, autoSolve: 2, 
+      nativeEar: 10, contextVision: 10,
+      darwinLens: 10, timeWarp: 10 
+    }
   });
 
   const [brushColor, setBrushColor] = useState('#ec4899');
@@ -31,10 +36,10 @@ const App: React.FC = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationQuote, setCelebrationQuote] = useState("");
 
-  const JANA_ID = 'jana_tablet_user_v9';
+  const JANA_ID = 'jana_tablet_user_v10';
 
   useEffect(() => {
-    const saved = localStorage.getItem('jana_kpop_v9');
+    const saved = localStorage.getItem('jana_kpop_v10');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -44,13 +49,12 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('jana_kpop_v9', JSON.stringify(progress));
+    localStorage.setItem('jana_kpop_v10', JSON.stringify(progress));
     syncProgress(JANA_ID, progress);
   }, [progress]);
 
-  // FUNCIÓN CLAVE PARA AUDIO EN MÓVILES
   const handleStartApp = async () => {
-    await sounds.unlockAudio(); // Desbloquea AudioContext y Speech
+    await sounds.unlockAudio(); 
     sounds.playClick();
     setScreen('menu');
   };
@@ -113,17 +117,17 @@ const App: React.FC = () => {
       {screen === 'splash' && (
         <div className="flex-grow flex flex-col items-center justify-center bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600 text-white p-6 relative">
           <div className="mb-6 animate-bounce text-center">
-            <i className="fas fa-brain text-7xl md:text-9xl text-yellow-300 drop-shadow-2xl"></i>
-            <p className="font-fredoka text-2xl mt-4 tracking-widest text-pink-200">K-POP ACADEMY</p>
+            <i className="fas fa-atom text-7xl md:text-9xl text-yellow-300 drop-shadow-2xl"></i>
+            <p className="font-fredoka text-2xl mt-4 tracking-widest text-pink-200 uppercase">BioSphere Academy</p>
           </div>
-          <h1 className="text-5xl md:text-8xl font-fredoka mb-2 text-center leading-tight uppercase tracking-tighter">JANA<br/>EDITION</h1>
+          <h1 className="text-5xl md:text-8xl font-fredoka mb-2 text-center leading-tight uppercase tracking-tighter">JANA<br/>SCIENTIST</h1>
           <button 
             onClick={handleStartApp} 
             className="mt-8 bg-white text-pink-600 px-16 py-6 rounded-full text-3xl font-fredoka shadow-2xl active:scale-95 transition-all hover:bg-pink-50"
           >
-            ¡EMPEZAR!
+            ¡EXPLORAR!
           </button>
-          <p className="absolute bottom-10 opacity-50 text-[10px] font-bold uppercase tracking-widest">Optimized for Tablets & Sound</p>
+          <p className="absolute bottom-10 opacity-50 text-[10px] font-bold uppercase tracking-widest">BioSphere: Despertar Científico</p>
         </div>
       )}
 
@@ -182,7 +186,15 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex-grow flex flex-col overflow-hidden">
-             {currentLevel.type === 'lingua-flow' ? (
+             {currentLevel.type === 'science-lab' ? (
+               <ScienceBoard 
+                 level={currentLevel} 
+                 powerUps={progress.powerUps} 
+                 onCorrect={completeLevel} 
+                 onWrong={() => sounds.playWrong()} 
+                 usePowerUp={usePowerUp} 
+               />
+             ) : currentLevel.type === 'lingua-flow' ? (
                <LinguaBoard 
                  level={currentLevel} 
                  powerUps={progress.powerUps} 
