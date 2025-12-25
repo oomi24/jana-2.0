@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { ModuleId, UserProgress, Level, GalleryItem, DrawingTool } from './types';
+import { ModuleId, UserProgress, Level, DrawingTool } from './types';
 import { WARRIORS, LEVELS, MOTIVATIONAL_QUOTES } from './constants';
 import CanvasBoard from './components/CanvasBoard';
 import QuizBoard from './components/QuizBoard';
+import MathBoard from './components/MathBoard';
 import IconButton from './components/IconButton';
 import { sounds } from './utils/audio';
 import { syncProgress } from './supabase';
@@ -19,7 +20,8 @@ const App: React.FC = () => {
     stars: {},
     stickers: [],
     gallery: [],
-    totalPoints: 0
+    totalPoints: 0,
+    powerUps: { doubleXP: 5, hint: 5, extraTime: 5, autoSolve: 2 }
   });
 
   const [brushColor, setBrushColor] = useState('#ec4899');
@@ -28,18 +30,10 @@ const App: React.FC = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationQuote, setCelebrationQuote] = useState("");
 
-  const JANA_ID = 'jana_tablet_user';
-
-  // 20 Colores vibrantes para Jana
-  const PALETTE = [
-    '#ec4899', '#ef4444', '#f97316', '#eab308', '#22c55e', 
-    '#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', 
-    '#a855f7', '#d946ef', '#78350f', '#fbbf24', '#ffffff', 
-    '#cbd5e1', '#64748b', '#000000', '#fecaca', '#bbf7d0'
-  ];
+  const JANA_ID = 'jana_tablet_user_v7';
 
   useEffect(() => {
-    const saved = localStorage.getItem('jana_kpop_v5');
+    const saved = localStorage.getItem('jana_kpop_v7');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -49,9 +43,26 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('jana_kpop_v5', JSON.stringify(progress));
+    localStorage.setItem('jana_kpop_v7', JSON.stringify(progress));
     syncProgress(JANA_ID, progress);
   }, [progress]);
+
+  const usePowerUp = (type: string): boolean => {
+    if ((progress.powerUps as any)[type] > 0) {
+      sounds.playCelebration();
+      setProgress(prev => ({
+        ...prev,
+        powerUps: { ...prev.powerUps, [type]: (prev.powerUps as any)[type] - 1 }
+      }));
+      
+      if (type === 'autoSolve' && currentLevel) {
+        setTimeout(() => completeLevel(300), 500);
+      }
+      return true;
+    }
+    sounds.playWrong();
+    return false;
+  };
 
   const completeLevel = (points: number = 100) => {
     if (!currentLevel) return;
@@ -61,8 +72,7 @@ const App: React.FC = () => {
     setShowCelebration(true);
 
     const nextIndex = currentLevel.index + 1;
-    const nextId = `${currentLevel.moduleId}_${nextIndex}`;
-    const nextLevel = LEVELS.find(l => l.id === nextId);
+    const nextLevel = LEVELS.find(l => l.moduleId === currentLevel.moduleId && l.index === nextIndex);
 
     setProgress(prev => ({
       ...prev,
@@ -81,65 +91,44 @@ const App: React.FC = () => {
   };
 
   const startFreeDraw = () => {
-    const freeLevel: Level = {
-      id: 'free_draw',
-      moduleId: 'color',
-      type: 'paint',
-      index: 0,
-      objective: "🎨 DIBUJO LIBRE",
-      help: "¡Crea tu propia magia!",
-      rewardId: "free"
-    };
-    setCurrentLevel(freeLevel);
-    setScreen('game');
+    const freeLevel: Level = { id: 'free_draw', moduleId: 'color', type: 'paint', index: 0, objective: "🎨 LIBRE", help: "", rewardId: "free" };
+    setCurrentLevel(freeLevel); setScreen('game');
   };
 
   const saveToGallery = (dataUrl: string) => {
-    const newItem = { 
-      id: Date.now().toString(), 
-      timestamp: Date.now(), 
-      dataUrl, 
-      title: String(currentLevel?.objective || 'Mi Arte K-Pop') 
-    };
+    const newItem = { id: Date.now().toString(), timestamp: Date.now(), dataUrl, title: String(currentLevel?.objective || 'Mi Arte') };
     setProgress(prev => ({ ...prev, gallery: [newItem, ...prev.gallery].slice(0, 40) }));
   };
 
   return (
-    <div className="h-[100dvh] w-full overflow-hidden flex flex-col font-quicksand bg-pink-50">
+    <div className="h-[100dvh] w-full overflow-hidden flex flex-col font-quicksand bg-[#fdf2f8]">
       {screen === 'splash' && (
-        <div className="flex-grow flex flex-col items-center justify-center bg-gradient-to-b from-pink-400 to-purple-600 text-white p-6">
-          <div className="mb-6 animate-bounce">
-            <i className="fas fa-palette text-7xl md:text-9xl text-yellow-300 drop-shadow-lg"></i>
+        <div className="flex-grow flex flex-col items-center justify-center bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600 text-white p-6">
+          <div className="mb-6 animate-bounce text-center">
+            <i className="fas fa-brain text-7xl md:text-9xl text-yellow-300 drop-shadow-2xl"></i>
+            <p className="font-fredoka text-2xl mt-4 tracking-widest text-pink-200">MATHMASTERS</p>
           </div>
-          <h1 className="text-5xl md:text-8xl font-fredoka mb-2 text-center leading-none">K-POP<br/><span className="text-xl md:text-4xl text-pink-200">ACADEMY</span></h1>
-          <p className="mb-8 font-bold opacity-80 uppercase tracking-widest text-sm md:text-base">Jana Edition ✨</p>
-          <button 
-            onClick={() => { sounds.playClick(); setScreen('menu'); }} 
-            className="bg-white text-pink-600 px-12 py-4 md:px-16 md:py-6 rounded-full text-2xl md:text-4xl font-fredoka shadow-2xl active:scale-90 transition-all"
-          >
-            ¡JUGAR!
-          </button>
+          <h1 className="text-5xl md:text-8xl font-fredoka mb-2 text-center leading-tight uppercase tracking-tighter">Cerebro<br/>Numérico</h1>
+          <button onClick={() => { sounds.playClick(); setScreen('menu'); }} className="mt-8 bg-white text-pink-600 px-16 py-6 rounded-full text-3xl font-fredoka shadow-2xl active:scale-95 transition-all">¡JUGAR!</button>
         </div>
       )}
 
       {screen === 'menu' && (
-        <div className="p-4 md:p-6 flex-grow flex flex-col gap-4 md:gap-6 overflow-y-auto">
-          <div className="flex justify-between items-center bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-lg border-b-4 border-pink-200 sticky top-0 z-10">
-             <h2 className="text-xl md:text-3xl font-fredoka text-pink-500 truncate">¡Hola Jana! ✨</h2>
-             <div className="flex gap-2 md:gap-4">
-                <IconButton icon="fa-paint-brush" onClick={startFreeDraw} colorClass="bg-gradient-to-r from-orange-400 to-pink-500" label="Libre" pulse />
-                <IconButton icon="fa-images" onClick={() => setScreen('gallery')} colorClass="bg-purple-500" label="Galería" />
+        <div className="p-4 md:p-6 flex-grow flex flex-col gap-4 overflow-y-auto">
+          <div className="flex justify-between items-center bg-white p-4 rounded-3xl shadow-lg border-b-4 border-pink-100 sticky top-0 z-10">
+             <h2 className="text-xl md:text-2xl font-fredoka text-pink-500">Jana ✨ <span className="text-gray-400 text-xs block font-quicksand">PTS: {progress.totalPoints}</span></h2>
+             <div className="flex gap-2">
+                <IconButton icon="fa-paint-brush" onClick={startFreeDraw} colorClass="bg-orange-400" label="Arte" />
+                <IconButton icon="fa-images" onClick={() => setScreen('gallery')} colorClass="bg-purple-50" label="Arte" />
              </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 pb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {Object.values(WARRIORS).map(w => (
-              <div 
-                key={w.id} 
-                onClick={() => { sounds.playClick(); setSelectedModule(w.id); setScreen('levels'); }} 
-                className={`p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] bg-gradient-to-br ${w.gradient} text-white cursor-pointer hover:scale-[1.02] active:scale-95 transition-all shadow-xl h-40 md:h-56 flex flex-col justify-between border-4 border-white/20`}
-              >
-                <i className={`fas ${w.icon} text-4xl md:text-6xl opacity-30 self-end`}></i>
-                <h3 className="text-2xl md:text-4xl font-fredoka">{w.name}</h3>
+              <div key={w.id} onClick={() => { sounds.playClick(); setSelectedModule(w.id); setScreen('levels'); }} 
+                className={`p-6 rounded-[2.5rem] bg-gradient-to-br ${w.gradient} text-white cursor-pointer hover:scale-[1.02] active:scale-95 transition-all shadow-xl h-44 flex flex-col justify-between border-4 border-white/20 relative overflow-hidden group`}>
+                <i className={`fas ${w.icon} text-6xl absolute -bottom-2 -right-2 opacity-10 group-hover:scale-110 transition-transform`}></i>
+                <h3 className="text-2xl font-fredoka uppercase tracking-tighter relative z-10">{w.name}</h3>
+                <span className="text-[10px] font-bold opacity-70 uppercase tracking-widest relative z-10">{w.subject}</span>
               </div>
             ))}
           </div>
@@ -147,26 +136,19 @@ const App: React.FC = () => {
       )}
 
       {screen === 'levels' && (
-        <div className="p-4 md:p-6 flex-grow flex flex-col gap-4 md:gap-6 overflow-hidden">
-          <div className="flex items-center gap-3 md:gap-4">
+        <div className="p-4 md:p-6 flex-grow flex flex-col gap-4 overflow-hidden">
+          <div className="flex items-center gap-3">
             <IconButton icon="fa-home" onClick={() => setScreen('menu')} colorClass="bg-gray-400" />
-            <h2 className="text-lg md:text-3xl font-fredoka text-pink-500 uppercase truncate tracking-tighter">{WARRIORS[selectedModule].name}</h2>
+            <h2 className="text-xl font-fredoka text-pink-500 uppercase">{WARRIORS[selectedModule].name}</h2>
           </div>
-          <div className="flex-grow overflow-y-auto grid grid-cols-4 sm:grid-cols-6 md:grid-cols-10 gap-2 md:gap-4 pb-20">
+          <div className="flex-grow overflow-y-auto grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2 pb-20">
             {LEVELS.filter(l => l.moduleId === selectedModule).map(l => {
               const unlocked = l.index === 1 || progress.levelsCompleted.includes(`${l.moduleId}_${l.index - 1}`);
               return (
-                <button 
-                  key={l.id} 
-                  disabled={!unlocked} 
-                  onClick={() => { sounds.playClick(); setCurrentLevel(l); setScreen('game'); }} 
-                  className={`aspect-square rounded-xl md:rounded-3xl font-fredoka text-xl md:text-3xl shadow-md flex items-center justify-center transition-all ${
-                    progress.levelsCompleted.includes(l.id) ? 'bg-pink-500 text-white' : 
-                    unlocked ? 'bg-white text-pink-500 border-2 md:border-4 border-pink-100' : 
-                    'bg-gray-200 text-gray-400 opacity-60'
-                  }`}
-                >
-                  {unlocked ? l.index : <i className="fas fa-lock text-xs md:text-sm"></i>}
+                <button key={l.id} disabled={!unlocked} onClick={() => { sounds.playClick(); setCurrentLevel(l); setScreen('game'); }}
+                  className={`aspect-square rounded-2xl font-fredoka text-xl shadow-md flex items-center justify-center transition-all ${
+                    progress.levelsCompleted.includes(l.id) ? 'bg-pink-500 text-white' : unlocked ? 'bg-white text-pink-500 border-4 border-pink-50' : 'bg-gray-200 text-gray-400 opacity-40'}`}>
+                  {unlocked ? l.index : <i className="fas fa-lock text-xs"></i>}
                 </button>
               );
             })}
@@ -176,69 +158,33 @@ const App: React.FC = () => {
 
       {screen === 'game' && currentLevel && (
         <div className="flex-grow flex flex-col overflow-hidden h-full">
-          {/* Header del Juego */}
-          <div className="p-2 md:p-3 bg-white flex justify-between items-center border-b-2 md:border-b-4 border-pink-100 flex-shrink-0">
+          <div className="p-2 bg-white flex justify-between items-center border-b-2 border-pink-50 flex-shrink-0">
             <IconButton icon="fa-arrow-left" onClick={() => setScreen('levels')} colorClass="bg-gray-400" />
-            <div className="text-center flex-grow overflow-hidden px-2">
-               <h3 className="text-base md:text-2xl font-black text-purple-600 truncate">{currentLevel.objective}</h3>
+            <div className="text-center flex-grow px-4 overflow-hidden">
+               <h3 className="text-xs md:text-sm font-black text-purple-600 truncate uppercase tracking-widest">{currentLevel.objective}</h3>
             </div>
-            {currentLevel.type === 'paint' ? (
-              <IconButton icon="fa-check" onClick={() => completeLevel()} colorClass="bg-green-500" label="¡LISTO!" pulse />
-            ) : <div className="w-12 md:w-14"></div>}
+            {currentLevel.type === 'paint' && <IconButton icon="fa-check" onClick={() => completeLevel()} colorClass="bg-green-500" label="LISTO" />}
+            {currentLevel.type !== 'paint' && <div className="w-12"></div>}
           </div>
 
-          <div className="flex-grow flex flex-col md:flex-row p-2 md:p-4 gap-2 md:gap-4 overflow-hidden bg-pink-100/10">
-             {currentLevel.type === 'paint' ? (
-               <>
-                 <CanvasBoard 
-                    brushColor={brushColor} 
-                    brushSize={brushSize} 
-                    tool={tool} 
-                    silhouette={currentLevel.visual} 
-                    levelId={currentLevel.id}
-                    onSave={saveToGallery} 
-                 />
-                 
-                 {/* Barra de Herramientas Responsiva */}
-                 <div className="flex-shrink-0 bg-white rounded-2xl md:rounded-[3rem] p-3 md:p-6 shadow-2xl flex flex-col md:w-48 overflow-y-auto max-h-[35%] md:max-h-full">
-                    {/* Paleta de Colores (Grid responsivo) */}
-                    <div className="grid grid-cols-10 md:grid-cols-2 gap-2 mb-4">
-                       {PALETTE.map(c => (
-                         <div 
-                           key={c} 
-                           onClick={() => { setBrushColor(c); if(tool==='eraser') setTool('brush'); }} 
-                           className={`w-7 h-7 md:w-12 md:h-12 rounded-full cursor-pointer border-2 md:border-4 ${brushColor===c && tool !== 'magic' ? 'border-gray-800 scale-110 shadow-lg' : 'border-gray-100'}`} 
-                           style={{background: c}}
-                         ></div>
-                       ))}
-                    </div>
-                    
-                    <div className="h-[2px] w-full bg-pink-50 mb-4"></div>
-                    
-                    {/* Botones de Herramientas (Fila en móvil, Columna en tablet) */}
-                    <div className="flex md:flex-col gap-2 justify-between mb-4">
-                       <IconButton icon="fa-paint-brush" onClick={() => setTool('brush')} colorClass={tool==='brush' ? 'bg-pink-500' : 'bg-gray-100 text-gray-400'} label="Pincel" />
-                       <IconButton icon="fa-magic" onClick={() => setTool('magic')} colorClass={tool==='magic' ? 'bg-gradient-to-br from-red-500 via-yellow-400 to-purple-600' : 'bg-gray-100 text-gray-400'} label="Magia" />
-                       <IconButton icon="fa-fill-drip" onClick={() => setTool('fill')} colorClass={tool==='fill' ? 'bg-blue-500' : 'bg-gray-100 text-gray-400'} label="Bote" />
-                       <IconButton icon="fa-eraser" onClick={() => setTool('eraser')} colorClass={tool==='eraser' ? 'bg-pink-200 text-pink-500' : 'bg-gray-100 text-gray-400'} label="Goma" />
-                    </div>
-                    
-                    <div className="h-[2px] w-full bg-pink-50 mb-4"></div>
-                    
-                    {/* Ajuste de Tamaño */}
-                    <div className="flex md:flex-col gap-3 items-center justify-center">
-                       <button 
-                        onClick={() => { sounds.playClick(); setBrushSize(prev => Math.min(150, prev + 15)); }} 
-                        className="w-10 h-10 md:w-16 md:h-16 bg-pink-50 text-pink-600 rounded-full font-bold text-2xl md:text-5xl shadow-sm active:scale-90"
-                       >+</button>
-                       <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase">Grosor</span>
-                       <button 
-                        onClick={() => { sounds.playClick(); setBrushSize(prev => Math.max(5, prev - 15)); }} 
-                        className="w-10 h-10 md:w-16 md:h-16 bg-pink-50 text-pink-600 rounded-full font-bold text-2xl md:text-5xl shadow-sm active:scale-90"
-                       >-</button>
-                    </div>
-                 </div>
-               </>
+          <div className="flex-grow flex flex-col overflow-hidden">
+             {currentLevel.type === 'math-master' ? (
+               <MathBoard 
+                 level={currentLevel} 
+                 powerUps={progress.powerUps} 
+                 onCorrect={completeLevel} 
+                 onWrong={() => sounds.playWrong()} 
+                 usePowerUp={usePowerUp} 
+               />
+             ) : currentLevel.type === 'paint' ? (
+               <CanvasBoard 
+                 brushColor={brushColor} 
+                 brushSize={brushSize} 
+                 tool={tool} 
+                 silhouette={currentLevel.visual} 
+                 levelId={currentLevel.id} 
+                 onSave={saveToGallery} 
+               />
              ) : (
                <QuizBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} />
              )}
@@ -247,28 +193,21 @@ const App: React.FC = () => {
       )}
 
       {showCelebration && (
-        <div className="fixed inset-0 z-[100] bg-pink-600/90 flex flex-col items-center justify-center text-white text-center p-6 md:p-8 backdrop-blur-xl animate-fade-in">
-          <div className="text-[8rem] md:text-[12rem] mb-4 animate-bounce drop-shadow-2xl">🌟</div>
-          <h2 className="text-5xl md:text-8xl font-fredoka tracking-tighter leading-none mb-4">¡GENIAL JANA!</h2>
-          <p className="text-xl md:text-3xl font-bold bg-white/20 p-6 md:p-10 rounded-2xl md:rounded-[3rem] border-2 md:border-4 border-white/30 max-w-2xl">{celebrationQuote}</p>
+        <div className="fixed inset-0 z-[100] bg-purple-600/95 flex flex-col items-center justify-center text-white text-center p-6 backdrop-blur-xl animate-fade-in">
+          <div className="text-[10rem] mb-4 animate-bounce drop-shadow-2xl">🏆</div>
+          <h2 className="text-5xl md:text-7xl font-fredoka mb-2 leading-none uppercase tracking-tighter">¡Brillante Jana!</h2>
+          <p className="text-xl md:text-2xl font-bold bg-white/10 p-8 rounded-[3rem] border-4 border-white/20 max-w-2xl">{celebrationQuote}</p>
         </div>
       )}
 
       {screen === 'gallery' && (
-        <div className="p-4 md:p-6 flex-grow flex flex-col gap-4 md:gap-6 overflow-y-auto">
-          <div className="flex items-center gap-3 md:gap-4 bg-white p-4 rounded-2xl md:rounded-3xl shadow-md sticky top-0 z-10">
-             <IconButton icon="fa-arrow-left" onClick={() => setScreen('menu')} colorClass="bg-gray-400" />
-             <h2 className="text-xl md:text-3xl font-fredoka text-pink-500 uppercase tracking-widest truncate">Mi Arte ✨</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 pb-32">
-            {progress.gallery.length === 0 ? (
-               <div className="col-span-full text-center py-10 opacity-30 italic">No hay dibujos todavía...</div>
-            ) : progress.gallery.map(item => (
-              <div key={item.id} className="bg-white p-3 rounded-2xl md:rounded-[3rem] shadow-xl border-2 md:border-4 border-pink-100 flex flex-col gap-2 transform active:scale-105 transition-transform">
-                <div className="bg-gray-50 rounded-xl md:rounded-2xl overflow-hidden aspect-[4/3]">
-                  <img src={item.dataUrl} className="w-full h-full object-contain" alt={item.title} />
-                </div>
-                <p className="text-center font-black text-pink-600 text-sm md:text-xl truncate px-2">{item.title}</p>
+        <div className="p-4 md:p-6 flex-grow flex flex-col gap-4 overflow-y-auto">
+          <IconButton icon="fa-arrow-left" onClick={() => setScreen('menu')} colorClass="bg-gray-400" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-20">
+            {progress.gallery.map(item => (
+              <div key={item.id} className="bg-white p-2 rounded-2xl shadow-xl border-4 border-pink-100 flex flex-col gap-2">
+                <img src={item.dataUrl} className="rounded-xl w-full aspect-square object-contain" />
+                <p className="text-center font-bold text-xs text-pink-500 truncate">{item.title}</p>
               </div>
             ))}
           </div>
