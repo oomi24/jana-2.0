@@ -25,7 +25,6 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
   const [bgColor, setBgColor] = useState('white');
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // LIMPIEZA AUTOMÁTICA al cambiar de nivel
   useEffect(() => {
     setPaths([]);
     setBgColor('white');
@@ -52,7 +51,6 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     if (tool === 'fill') {
       setBgColor(brushColor);
       sounds.playSuccess();
-      // Guardar el cambio de fondo
       setTimeout(() => exportToImage(), 100);
       return;
     }
@@ -92,10 +90,9 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    const rect = svgRef.current.getBoundingClientRect();
     
-    canvas.width = 800; // Ancho base de la viewBox
-    canvas.height = 600; // Alto base de la viewBox
+    canvas.width = 800; 
+    canvas.height = 600; 
     
     const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
@@ -113,7 +110,7 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
   };
 
   return (
-    <div className="w-full flex-grow bg-white rounded-[2rem] md:rounded-[3.5rem] shadow-2xl overflow-hidden border-4 md:border-8 border-pink-200 cursor-crosshair relative">
+    <div className="w-full flex-grow bg-white rounded-[2rem] md:rounded-[3.5rem] shadow-2xl overflow-hidden border-4 md:border-8 border-pink-200 cursor-crosshair relative touch-lock">
       <svg
         ref={svgRef}
         viewBox="0 0 800 600"
@@ -124,7 +121,6 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
         onMouseLeave={endDrawing}
         onTouchStart={(e) => { e.preventDefault(); startDrawing(e); }}
         onTouchMove={(e) => { e.preventDefault(); draw(e); }}
-        // Fix: Removed unused event argument 'e' from endDrawing() call as it takes 0 arguments
         onTouchEnd={(e) => { e.preventDefault(); endDrawing(); }}
         className="w-full h-full touch-none select-none"
       >
@@ -144,10 +140,8 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
           </filter>
         </defs>
 
-        {/* Rectángulo de FONDO TOTAL - Esto es lo que pinta el bote de pintura */}
         <rect width="800" height="600" fill={bgColor} style={{ transition: 'fill 0.4s' }} />
 
-        {/* Silueta de guía */}
         {silhouette && silhouette.startsWith('M') && (
           <path 
             d={silhouette} 
