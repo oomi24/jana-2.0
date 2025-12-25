@@ -10,6 +10,20 @@ export const WARRIORS: Record<ModuleId, Warrior> = {
   science: { id: 'science', name: 'NATURA', title: 'Guerrera Natural', subject: 'Ciencias', color: '#10b981', gradient: 'from-emerald-400 to-teal-600', description: 'Descubre la ciencia.', icon: 'fa-leaf' },
 };
 
+// --- DATA PARA CIENCIA (NATURA) ---
+const SCIENCE_ITEMS = [
+  { id: 'm1', label: 'Cuarzo Rosa', symbol: 'SiO2', desc: 'Un mineral compuesto de sílice, muy común en las montañas.', icon: 'fa-gem', category: 'mineral' },
+  { id: 'm2', label: 'Pirita', symbol: 'FeS2', desc: 'Conocida como el "oro de los tontos" por su brillo metálico.', icon: 'fa-cube', category: 'mineral' },
+  { id: 'a1', label: 'Mariposa Monarca', symbol: 'ID', desc: 'Famosa por su gran migración a través del continente.', icon: 'fa-bug', category: 'animal' },
+  { id: 'a2', label: 'Escarabajo Hércules', symbol: 'EH', desc: 'Uno de los insectos más fuertes del mundo.', icon: 'fa-spider', category: 'animal' },
+  { id: 'p1', label: 'Helecho Real', symbol: 'PT', desc: 'Una de las plantas más antiguas de la Tierra.', icon: 'fa-leaf', category: 'plant' },
+  { id: 'p2', label: 'Orquídea', symbol: 'VF', desc: 'La flor nacional de Venezuela, crece en los árboles.', icon: 'fa-seedling', category: 'plant' },
+  { id: 's1', label: 'Satélite Jana-1', symbol: 'SAT', desc: 'Un satélite que observa el clima desde el espacio.', icon: 'fa-satellite', category: 'space' },
+  { id: 's2', label: 'Agujero Negro', symbol: 'G', desc: 'Una región del espacio con gravedad super fuerte.', icon: 'fa-circle-dot', category: 'space' }
+];
+
+const SCENARIOS = ['forest', 'caves', 'lab', 'space'];
+
 // --- GENERADOR DE CONTENIDO PARA 100 NIVELES DE LECTURA ---
 const STORY_CATEGORIES = [
   { name: "Fábulas y Cuentos", themes: ["animales", "moralejas", "fantasía"], authors: ["Esopo", "Andersen", "Perrault"] },
@@ -26,7 +40,6 @@ const generateStoryContent = (level: number, category: any) => {
     `La ciencia detrás de ${category.themes[2]} es fascinante. Los investigadores observan patrones en la naturaleza para comprender el universo. Cada átomo y cada galaxia están conectados en un baile cósmico. Jana observa a través del microscopio, descubriendo mundos invisibles que esperan ser nombrados.`
   ];
   const base = templates[level % templates.length];
-  // Aumentar complejidad repitiendo o extendiendo según el nivel
   return Array(diff).fill(base).join("\n\n");
 };
 
@@ -79,7 +92,7 @@ export const LEVELS: Level[] = (() => {
     const max = mod === 'reading' ? 100 : 60;
     for (let i = 1; i <= max; i++) {
       let type: Level['type'] = 'quiz';
-      let obj = "", ques = "", ans: any = 0, visual = "", readingData: any = null;
+      let obj = "", ques = "", ans: any = 0, visual = "", readingData: any = null, scientificData: any = null, scenario = "default";
 
       if (mod === 'reading') {
         type = 'reading-adventure';
@@ -99,12 +112,29 @@ export const LEVELS: Level[] = (() => {
         obj = "Mapa de Venezuela"; ques = `Capital de ${state.name}`; ans = state.capital;
       } else if (mod === 'science') {
         type = 'science-lab';
-        obj = "Exploración";
+        scenario = SCENARIOS[i % SCENARIOS.length];
+        obj = "Expedición: " + (scenario === 'forest' ? 'Selva' : scenario === 'caves' ? 'Cueva' : 'Laboratorio');
+        
+        // Generar objetos ocultos aleatorios para el nivel
+        const itemsForLevel = [...SCIENCE_ITEMS]
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 4)
+          .map((item, idx) => ({
+            ...item,
+            x: 15 + Math.random() * 70,
+            y: 15 + Math.random() * 70
+          }));
+          
+        scientificData = {
+          category: scenario === 'forest' ? 'plant' : scenario === 'space' ? 'space' : 'mineral',
+          discoveries: ["Nueva especie hallada", "Patrón celular detectado"],
+          hiddenItems: itemsForLevel
+        };
       }
 
       levels.push({
         id: `${mod}_${i}`, moduleId: mod, type, index: i, objective: obj, help: "Sigue adelante.",
-        question: ques, answer: ans, rewardId: `r_${i}`, readingData
+        question: ques, answer: ans, rewardId: `r_${i}`, readingData, scientificData, scenario
       });
     }
   });
