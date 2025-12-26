@@ -58,35 +58,76 @@ const GEO_EXTENDED = [
   { name: "Pico Bolívar", capital: "Mérida", region: "Andina", fact: "Punto más alto.", icon: "fa-snowflake" }
 ];
 
-const STORY_COMPONENTS = {
-  characters: ["Jana la exploradora", "el robot Bip", "la mariposa azul", "el sabio búho", "el pequeño astronauta", "la detective de flores", "el capitán estelar", "la científica curiosa"],
-  actions: ["descubrió un secreto en", "viajó valientemente hacia", "encontró un mapa oculto en", "investigó un misterio en", "ayudó a sus amigos en", "resolvió un enigma en"],
-  places: ["el bosque de cristal", "la luna de queso", "el laboratorio secreto", "la cueva de los ecos", "el jardín flotante", "la estación espacial", "el fondo del mar azul"],
-  endings: ["y así aprendió que la curiosidad es la mejor brújula.", "descubriendo que el trabajo en equipo lo logra todo.", "y todos celebraron con una gran fiesta de estrellas.", "prometiendo que siempre protegería la naturaleza."]
+// --- SISTEMA DE NARRATIVA MULTIGÉNERO PARA LECTORA ---
+const STORY_RESOURCES = {
+  genres: [
+    {
+      name: "Fantasía Épica",
+      intro: "En el Reino de los Colores, {char} guardaba un secreto.",
+      plot: "Un día, las nubes se volvieron grises y {char} tuvo que usar {tool} para devolverle el brillo al cielo. No fue fácil, pues el Gigante Sombrío intentaba detenerla.",
+      lesson: "Descubrió que incluso la magia más poderosa reside en el corazón de quien persevera.",
+      q: "¿Quién intentaba detener al protagonista?",
+      opts: ["El Gigante Sombrío", "Un ratón", "Un dragón", "Nadie"],
+      ans: 0
+    },
+    {
+      name: "Ciencia Ficción",
+      intro: "A bordo de la Estación Espacial Jana-2, {char} detectó una señal extraña.",
+      plot: "La señal venía de un planeta de cristal. Con la ayuda de {tool}, logró traducir el mensaje: ¡los aliens querían jugar al escondite estelar!",
+      lesson: "Aprendió que la tecnología es maravillosa para hacer nuevos amigos en toda la galaxia.",
+      q: "¿De dónde venía la señal?",
+      opts: ["De un planeta de cristal", "Del Sol", "De la Tierra", "De una pizza"],
+      ans: 0
+    },
+    {
+      name: "Misterio Detective",
+      intro: "El caso de las flores desaparecidas en {place} era un enigma para {char}.",
+      plot: "Analizando las huellas con {tool}, encontró que no era un ladrón, sino un grupo de abejas que estaban mudando su jardín a un lugar más soleado.",
+      lesson: "Entendió que antes de juzgar, siempre es mejor investigar con mucho detalle.",
+      q: "¿Qué estaban haciendo las abejas?",
+      opts: ["Mudando su jardín", "Durmiendo", "Comiendo dulces", "Bailando"],
+      ans: 0
+    },
+    {
+      name: "Aventura en la Naturaleza",
+      intro: "{char} se adentró en lo más profundo de {place} buscando un río de plata.",
+      plot: "El camino estaba bloqueado por lianas gigantes. Usando {tool}, encontró un camino secreto entre los árboles frutales.",
+      lesson: "Se dio cuenta de que la naturaleza siempre te muestra el camino si sabes escucharla.",
+      q: "¿Qué buscaba el protagonista?",
+      opts: ["Un río de plata", "Oro", "Un tesoro", "Una cueva"],
+      ans: 0
+    }
+  ],
+  characters: [
+    { name: "Jana la exploradora", tool: "su lupa mágica" },
+    { name: "Bip-Bop el robot", tool: "su radar de neón" },
+    { name: "Celeste la científica", tool: "su cuaderno de notas" },
+    { name: "Teo el astronauta", tool: "su brújula estelar" }
+  ],
+  places: ["el Bosque Esmeralda", "la Ciudad de los Sueños", "la Isla de los Inventos", "el Valle de los Ecos"]
 };
 
 const getUniqueStory = (level: number) => {
-  const char = STORY_COMPONENTS.characters[level % STORY_COMPONENTS.characters.length];
-  const action = STORY_COMPONENTS.actions[level % STORY_COMPONENTS.actions.length];
-  const place = STORY_COMPONENTS.places[level % STORY_COMPONENTS.places.length];
-  const ending = STORY_COMPONENTS.endings[level % STORY_COMPONENTS.endings.length];
+  const genre = STORY_RESOURCES.genres[level % STORY_RESOURCES.genres.length];
+  const char = STORY_RESOURCES.characters[level % STORY_RESOURCES.characters.length];
+  const place = STORY_RESOURCES.places[level % STORY_RESOURCES.places.length];
   
-  const content = `${char} ${action} ${place}. Durante su travesía, tuvo que observar con mucho cuidado cada detalle. No fue fácil, pero gracias a su inteligencia y a las herramientas científicas que llevaba, pudo entender lo que sucedía. Finalmente, todo salió bien, ${ending}`;
+  const content = `${genre.intro.replace('{char}', char.name)} ${genre.plot.replace('{char}', char.name).replace('{tool}', char.tool).replace('{place}', place)} Al final de su travesía, ${genre.lesson}`;
 
   return {
-    title: `Aventura ${level}: El Secreto de ${place}`,
+    title: `${genre.name}: Nivel ${level}`,
     author: "Academia Jana",
     content: content,
-    difficulty: Math.floor(level / 20) + 1,
-    estimatedTime: `${Math.floor(level / 15) + 2} min`,
+    difficulty: Math.floor(level / 25) + 1,
+    estimatedTime: `${Math.min(5, 2 + Math.floor(level / 20))} min`,
     vocabulary: [
-      { word: "Travesía", meaning: "Un viaje lleno de aventuras." },
-      { word: "Enigma", meaning: "Un misterio difícil de resolver." }
+      { word: "Perseverar", meaning: "Seguir intentando con ganas." },
+      { word: "Enigma", meaning: "Un mystery por resolver." }
     ],
-    objectives: ["Comprensión lectora", "Nuevas palabras"],
+    objectives: ["Comprensión crítica", "Géneros literarios"],
     questions: [
-      { question: `¿Quién es el protagonista?`, options: [char, "Un gigante", "Un pirata", "Un gato"], correct: 0 },
-      { question: `¿Dónde sucede la historia?`, options: ["En la playa", place, "En un volcán", "En un cine"], correct: 1 }
+      { question: genre.q, options: genre.opts, correct: genre.ans },
+      { question: `¿Qué herramienta usó el protagonista?`, options: [char.tool, "Un martillo", "Una espada", "Un paraguas"], correct: 0 }
     ]
   };
 };
@@ -149,7 +190,6 @@ export const LEVELS: Level[] = (() => {
       } else if (mod === 'science') {
         type = 'science-lab';
         obj = "Naturaleza: Exploración " + i;
-        // Restaurar siembra de elementos ocultos
         const items = [...SCIENCE_ITEMS].sort(() => Math.random() - 0.5).slice(0, 4).map(it => ({
           ...it, x: 10 + Math.random()*80, y: 10 + Math.random()*80
         }));
