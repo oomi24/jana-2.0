@@ -26,36 +26,22 @@ export interface Level {
   help: string;
   question?: string;
   answer?: any;
-  translation?: string;
-  scenario?: string; 
-  operation?: 'mult' | 'div' | 'mix';
+  mathData?: {
+    op: string;
+    v1: number;
+    v2: number;
+  };
   visual?: string; 
   options?: QuizOption[];
-  factCard?: FactCard;
   rewardId: string;
-  hints?: string[];
   scientificData?: {
-    category: 'mineral' | 'plant' | 'animal' | 'micro' | 'space';
-    discoveries: string[];
-    hiddenItems: { id: string, label: string, x: number, y: number, icon: string }[];
+    hiddenItems: { id: string, label: string, x: number, y: number, icon: string, symbol?: string, desc?: string }[];
   };
   readingData?: {
     title: string;
     content: string;
-    author: string;
     vocabulary: { word: string, meaning: string }[];
-    objectives: string[];
-    difficulty: number;
-    estimatedTime: string;
     questions: { question: string, options: string[], correct: number }[];
-  };
-  englishData?: {
-    lessonTitle: string;
-    category: string;
-    exerciseType: 'multiple-choice' | 'matching' | 'sentence' | 'vocab';
-    pronunciation?: string;
-    dialogue?: { speaker: string, text: string, translation: string }[];
-    matchingPairs?: { english: string, spanish: string }[];
   };
 }
 
@@ -74,28 +60,7 @@ export interface UserProgress {
   levelsCompleted: string[];
   stars: Record<string, number>;
   stickers: string[];
-  gallery: GalleryItem[];
+  gallery: any[];
   totalPoints: number;
-  readingStats?: {
-    wordsRead: number;
-    booksCompleted: number;
-    perfectQuizzes: number;
-  };
-  powerUps: {
-    doubleXP: number;
-    hint: number;
-    extraTime: number;
-    autoSolve: number;
-    nativeEar: number;
-    contextVision: number;
-    darwinLens: number;
-    timeWarp: number;
-  };
-}
-
-export interface GalleryItem {
-  id: string;
-  timestamp: number;
-  dataUrl: string;
-  title: string;
+  powerUps: any;
 }
