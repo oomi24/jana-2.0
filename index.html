@@ -24,7 +24,7 @@
             background: rgba(0,0,0,0.9); color: #0f0;
             font-family: monospace; font-size: 10px;
             z-index: 9999; max-height: 40%; overflow-y: auto;
-            display: none; padding: 10px; pointer-events: none;
+            display: none; padding: 10px; pointer-events: auto;
         }
         .loading-screen {
             position: fixed; inset: 0; background: #ec4899;
@@ -35,32 +35,42 @@
     <script>
         // Capturador de errores crítico para APK
         window.onerror = function(msg, url, line, col, error) {
-            var console = document.getElementById('debug-console');
-            if (console) {
-                console.style.display = 'block';
-                console.innerHTML += '<div>[ERROR] ' + msg + ' (' + line + ':' + col + ')</div>';
+            var consoleDiv = document.getElementById('debug-console');
+            if (consoleDiv) {
+                consoleDiv.style.display = 'block';
+                consoleDiv.innerHTML += '<div style="color: #ff5555; border-bottom: 1px solid #333; padding: 2px;">[ERROR] ' + msg + '<br><small>' + url + ':' + line + '</small></div>';
             }
             return false;
         };
         window.onunhandledrejection = function(event) {
-            var console = document.getElementById('debug-console');
-            if (console) {
-                console.style.display = 'block';
-                console.innerHTML += '<div>[PROMISE] ' + (event.reason || 'Error desconocido') + '</div>';
+            var consoleDiv = document.getElementById('debug-console');
+            if (consoleDiv) {
+                consoleDiv.style.display = 'block';
+                consoleDiv.innerHTML += '<div style="color: #ffaa00;">[PROMISE REJECTED] ' + (event.reason || 'Unknown error') + '</div>';
             }
         };
+
+        // Forzar desaparición del cargador tras 4 segundos
+        setTimeout(function() {
+            var loader = document.getElementById('loading');
+            if (loader && loader.style.opacity !== '0') {
+                loader.style.opacity = '0';
+                setTimeout(function() { loader.remove(); }, 500);
+                console.warn("El cargador se eliminó por tiempo de espera excedido.");
+            }
+        }, 4000);
     </script>
     <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@18.2.0",
-        "react-dom": "https://esm.sh/react-dom@18.2.0",
-        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-        "react/": "https://esm.sh/react@18.2.0/",
-        "react-dom/": "https://esm.sh/react-dom@18.2.0/"
-      }
-    }
-    </script>
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
 </head>
 <body>
     <div id="loading" class="loading-screen">
@@ -69,16 +79,6 @@
     </div>
     <div id="root"></div>
     <div id="debug-console"></div>
-    <script type="module">
-        import './index.tsx';
-        // Ocultar cargador cuando React tome el control
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const loader = document.getElementById('loading');
-                if (loader) loader.style.opacity = '0';
-                setTimeout(() => loader && loader.remove(), 500);
-            }, 1500);
-        });
-    </script>
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>
