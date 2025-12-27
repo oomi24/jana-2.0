@@ -33,12 +33,11 @@
         }
     </style>
     <script>
-        // Capturador de errores crítico para APK
         window.onerror = function(msg, url, line, col, error) {
             var consoleDiv = document.getElementById('debug-console');
             if (consoleDiv) {
                 consoleDiv.style.display = 'block';
-                consoleDiv.innerHTML += '<div style="color: #ff5555; border-bottom: 1px solid #333; padding: 2px;">[ERROR] ' + msg + '<br><small>' + url + ':' + line + '</small></div>';
+                consoleDiv.innerHTML += '<div style="color: #ff5555; border-bottom: 1px solid #333; padding: 2px;">[ERROR] ' + msg + '<br><small>' + line + '</small></div>';
             }
             return false;
         };
@@ -46,31 +45,28 @@
             var consoleDiv = document.getElementById('debug-console');
             if (consoleDiv) {
                 consoleDiv.style.display = 'block';
-                consoleDiv.innerHTML += '<div style="color: #ffaa00;">[PROMISE REJECTED] ' + (event.reason || 'Unknown error') + '</div>';
+                consoleDiv.innerHTML += '<div style="color: #ffaa00;">[PROMISE] ' + (event.reason || 'Error') + '</div>';
             }
         };
-
-        // Forzar desaparición del cargador tras 4 segundos
         setTimeout(function() {
             var loader = document.getElementById('loading');
             if (loader && loader.style.opacity !== '0') {
                 loader.style.opacity = '0';
                 setTimeout(function() { loader.remove(); }, 500);
-                console.warn("El cargador se eliminó por tiempo de espera excedido.");
             }
         }, 4000);
     </script>
     <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom": "https://esm.sh/react-dom@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/"
-  }
-}
-</script>
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom": "https://esm.sh/react-dom@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "react/": "https://esm.sh/react@18.2.0/",
+        "react-dom/": "https://esm.sh/react-dom@18.2.0/"
+      }
+    }
+    </script>
 </head>
 <body>
     <div id="loading" class="loading-screen">

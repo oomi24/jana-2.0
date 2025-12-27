@@ -47,9 +47,7 @@ const App: React.FC = () => {
         const parsed = JSON.parse(saved);
         if (parsed) setProgress(prev => ({ ...prev, ...parsed }));
       }
-    } catch (e) {
-      console.warn("No se pudo cargar el progreso local");
-    }
+    } catch (e) { console.warn(e); }
   }, []);
 
   useEffect(() => {
@@ -61,9 +59,7 @@ const App: React.FC = () => {
 
   const handleStartApp = () => {
     setScreen('menu');
-    sounds.unlockAudio().then(() => {
-      sounds.playClick();
-    }).catch(e => console.log("Audio unlock issues:", e));
+    sounds.unlockAudio().then(() => sounds.playClick()).catch(() => {});
   };
 
   const usePowerUp = (type: string): boolean => {
@@ -130,13 +126,7 @@ const App: React.FC = () => {
             <p className="text-2xl mt-4 tracking-widest text-pink-200 uppercase font-black">Academia del Aprendizaje</p>
           </div>
           <h1 className="text-5xl md:text-8xl font-black mb-2 text-center leading-tight uppercase tracking-tighter" style={{ fontFamily: 'Fredoka One, cursive' }}>JANA<br/>CIENTÍFICA</h1>
-          <button 
-            onClick={handleStartApp} 
-            className="mt-8 bg-white text-pink-600 px-16 py-6 rounded-full text-3xl font-black shadow-2xl active:scale-95 transition-all hover:bg-pink-50"
-          >
-            ¡ENTRAR!
-          </button>
-          <p className="absolute bottom-10 opacity-50 text-[10px] font-bold uppercase tracking-widest">Misión: Descubrimiento Total</p>
+          <button onClick={handleStartApp} className="mt-8 bg-white text-pink-600 px-16 py-6 rounded-full text-3xl font-black shadow-2xl active:scale-95 transition-all hover:bg-pink-50">¡ENTRAR!</button>
         </div>
       )}
 
@@ -154,8 +144,8 @@ const App: React.FC = () => {
               <div key={w.id} onClick={() => { sounds.playClick(); setSelectedModule(w.id); setScreen('levels'); }} 
                 className={`p-6 rounded-[2.5rem] bg-gradient-to-br ${w.gradient} text-white cursor-pointer hover:scale-[1.02] active:scale-95 transition-all shadow-xl h-44 flex flex-col justify-between border-4 border-white/20 relative overflow-hidden group`}>
                 <i className={`fas ${w.icon} text-6xl absolute -bottom-2 -right-2 opacity-10 group-hover:scale-110 transition-transform`}></i>
-                <h3 className="text-3xl font-black uppercase tracking-tighter relative z-10" style={{ fontFamily: 'Fredoka One, cursive' }}>{w.name}</h3>
-                <span className="text-xs font-bold opacity-80 uppercase tracking-widest relative z-10">{w.subject}</span>
+                <h3 className="text-3xl font-black uppercase tracking-tighter relative z-10" style={{ fontFamily: 'Fredoka One, cursive' }}>{String(w.name)}</h3>
+                <span className="text-xs font-bold opacity-80 uppercase tracking-widest relative z-10">{String(w.subject)}</span>
               </div>
             ))}
           </div>
@@ -166,7 +156,7 @@ const App: React.FC = () => {
         <div className="p-4 md:p-6 flex-grow flex flex-col gap-4 overflow-hidden">
           <div className="flex items-center gap-3">
             <IconButton icon="fa-home" onClick={() => setScreen('menu')} colorClass="bg-gray-400" />
-            <h2 className="text-2xl font-black text-pink-500 uppercase" style={{ fontFamily: 'Fredoka One, cursive' }}>{WARRIORS[selectedModule]?.name || 'Misión'}</h2>
+            <h2 className="text-2xl font-black text-pink-500 uppercase" style={{ fontFamily: 'Fredoka One, cursive' }}>{String(WARRIORS[selectedModule]?.name || 'Misión')}</h2>
           </div>
           <div className="flex-grow overflow-y-auto grid grid-cols-4 sm:grid-cols-8 md:grid-cols-10 gap-2 pb-20">
             {LEVELS.filter(l => l.moduleId === selectedModule).map(l => {
@@ -190,10 +180,9 @@ const App: React.FC = () => {
             <div className="text-center flex-grow px-2 overflow-hidden">
                <h3 className="text-[10px] md:text-sm font-black text-purple-600 truncate uppercase tracking-widest">{String(currentLevel.objective)}</h3>
             </div>
-            {currentLevel.type === 'paint' && (
+            {currentLevel.type === 'paint' ? (
               <IconButton icon="fa-check" onClick={() => completeLevel()} colorClass="bg-green-500" label="LISTO" />
-            )}
-            {currentLevel.type !== 'paint' && <div className="w-12 md:w-14"></div>}
+            ) : <div className="w-12 md:w-14"></div>}
           </div>
 
           <div className="flex-grow flex flex-col overflow-hidden relative">
@@ -243,9 +232,9 @@ const App: React.FC = () => {
       )}
 
       {showCelebration && (
-        <div className="fixed inset-0 z-[100] bg-purple-600/95 flex flex-col items-center justify-center text-white text-center p-6 backdrop-blur-xl animate-fade-in">
-          <div className="text-[10rem] mb-4 animate-bounce drop-shadow-2xl">🏆</div>
-          <h2 className="text-5xl md:text-7xl font-black mb-2 leading-none uppercase tracking-tighter" style={{ fontFamily: 'Fredoka One, cursive' }}>¡Brillante Jana!</h2>
+        <div className="fixed inset-0 z-[100] bg-purple-600/95 flex flex-col items-center justify-center text-white text-center p-6 backdrop-blur-xl">
+          <div className="text-[10rem] mb-4 animate-bounce">🏆</div>
+          <h2 className="text-5xl md:text-7xl font-black mb-2 uppercase" style={{ fontFamily: 'Fredoka One, cursive' }}>¡Brillante Jana!</h2>
           <p className="text-xl md:text-2xl font-bold bg-white/10 p-8 rounded-[3rem] border-4 border-white/20 max-w-2xl">{celebrationQuote}</p>
         </div>
       )}
@@ -260,12 +249,6 @@ const App: React.FC = () => {
                 <p className="text-center font-bold text-xs text-pink-500 truncate">{String(item.title)}</p>
               </div>
             ))}
-            {progress.gallery.length === 0 && (
-              <div className="col-span-full py-20 text-center opacity-30">
-                <i className="fas fa-camera text-9xl mb-4"></i>
-                <p className="font-fredoka text-2xl uppercase">Tu galería está vacía</p>
-              </div>
-            )}
           </div>
         </div>
       )}
