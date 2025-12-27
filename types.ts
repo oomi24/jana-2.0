@@ -34,6 +34,8 @@ export interface Level {
   visual?: string; 
   options?: QuizOption[];
   rewardId: string;
+  factCard?: FactCard;
+  hints?: string[];
   scientificData?: {
     hiddenItems: { id: string, label: string, x: number, y: number, icon: string, symbol?: string, desc?: string }[];
   };

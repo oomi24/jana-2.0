@@ -1,5 +1,5 @@
 
-import { Warrior, ModuleId, Level } from './types';
+import { Warrior, ModuleId, Level } from './types.ts';
 
 export const WARRIORS: Record<ModuleId, Warrior> = {
   color: { id: 'color', name: 'ARTE', title: 'Guerrera del Color', subject: 'Dibujo y Pintura', color: '#ec4899', gradient: 'from-pink-400 to-rose-600', description: 'Crea obras maestras.', icon: 'fa-palette' },
@@ -10,14 +10,13 @@ export const WARRIORS: Record<ModuleId, Warrior> = {
   science: { id: 'science', name: 'NATURALEZA', title: 'Científica Natural', subject: 'Ciencias y Vida', color: '#10b981', gradient: 'from-emerald-400 to-teal-600', description: 'Descubre el mundo.', icon: 'fa-leaf' },
 };
 
-// --- BASE DE DATOS DE LECTURA ---
 const STORY_POOL = [
   {
     title: "El Viaje del Colibrí Mágico",
     author: "Academia Jana",
     time: "2 min",
     content: "Había una vez un colibrí de alas brillantes que vivía en el Salto Ángel. Sus alas eran de color fucsia y turquesa. Un día, decidió volar hasta el Ávila para saludar a las nubes. En su viaje, descubrió que las flores de Venezuela tenían los aromas más dulces del mundo. Las nubes le regalaron un rayito de sol para que sus plumas siempre brillaran.",
-    vocab: [{word: "Fucsia", meaning: "Un color rosado muy intenso y brillante."}, {word: "Aroma", meaning: "Un olor muy agradable, como el de las flores."}],
+    vocab: [{word: "Fucsia", meaning: "Un color rosado muy intenso y brillante."}, {word: "Aroma", meaning: "Un olor muy agradable, como el de las flores Bitácora."}],
     questions: [
       { q: "¿De qué colores eran las alas del colibrí?", o: ["Rojo y Gris", "Fucsia y Turquesa", "Blanco"], c: 1 },
       { q: "¿A dónde decidió volar el colibrí?", o: ["Al mar", "Al Ávila", "A la selva"], c: 1 }
@@ -50,7 +49,12 @@ export const LEVELS: Level[] = (() => {
         help: "¡Tú puedes, Jana!" 
       };
       
-      if (mod === 'reading') {
+      if (mod === 'color') {
+        l.type = 'paint';
+        l.objective = "Arte Mágico: Nivel " + i;
+        const artIcons = ['fa-cat', 'fa-dog', 'fa-dragon', 'fa-sun', 'fa-moon', 'fa-star', 'fa-heart', 'fa-apple-alt', 'fa-ice-cream', 'fa-rocket', 'fa-ghost', 'fa-carrot', 'fa-cloud', 'fa-fish', 'fa-bird'];
+        l.visual = artIcons[i % artIcons.length];
+      } else if (mod === 'reading') {
         const s = STORY_POOL[(i - 1) % STORY_POOL.length];
         l.type = 'reading-adventure';
         l.objective = `Misión Lectura: ${s.title}`;
@@ -69,19 +73,30 @@ export const LEVELS: Level[] = (() => {
       } else if (mod === 'english') {
         l.type = 'lingua-flow';
         l.objective = "Vocabulario Inglés";
-        l.question = "Cat"; l.visual = "fa-cat"; l.answer = "Gato";
-        l.englishData = { pronunciation: "kat", category: "Animales" };
+        const engWords = [
+            {q: "Cat", a: "Gato", v: "fa-cat", p: "kat"},
+            {q: "Apple", a: "Manzana", v: "fa-apple-alt", p: "ap-el"},
+            {q: "Sun", a: "Sol", v: "fa-sun", p: "san"},
+            {q: "Milk", a: "Leche", v: "fa-glass-whiskey", p: "milk"},
+            {q: "Water", a: "Agua", v: "fa-tint", p: "uater"}
+        ];
+        const word = engWords[i % engWords.length];
+        l.question = word.q;
+        l.visual = word.v;
+        l.answer = word.a;
+        l.englishData = { pronunciation: word.p, category: "Básico" };
       } else if (mod === 'geo') {
         l.type = 'quiz';
         l.objective = "Explora Venezuela";
-        l.question = "¿Dónde está el Salto Ángel?";
-        l.visual = "fa-water";
-        l.options = [{text: "Bolívar", isCorrect: true}, {text: "Zulia", isCorrect: false}];
-        l.answer = "Es la cascada más alta del mundo.";
+        l.question = i % 2 === 0 ? "¿Dónde está el Salto Ángel?" : "¿Cuál es la capital de Venezuela?";
+        l.visual = i % 2 === 0 ? "fa-water" : "fa-city";
+        l.options = i % 2 === 0 ? 
+            [{text: "Estado Bolívar", isCorrect: true}, {text: "Estado Zulia", isCorrect: false}] :
+            [{text: "Caracas", isCorrect: true}, {text: "Maracaibo", isCorrect: false}];
+        l.answer = i % 2 === 0 ? "Es la cascada más alta del mundo." : "Caracas es conocida como la ciudad de la eterna primavera.";
       } else if (mod === 'math') {
-        const seed = i * 67;
-        const n1 = 100 + (seed % 900);
-        const n2 = 50 + (seed % 400);
+        const n1 = 10 + (i * 2);
+        const n2 = 5 + i;
         l.type = 'math-master';
         l.objective = "Cálculo Mental";
         l.mathData = { op: '+', v1: n1, v2: n2 };
@@ -89,7 +104,11 @@ export const LEVELS: Level[] = (() => {
       } else if (mod === 'science') {
         l.type = 'science-lab';
         l.objective = "Exploradora Natural";
-        l.scientificData = { hiddenItems: [{ id: 's1', label: 'Cristal', x: 50, y: 50, icon: 'fa-gem', desc: '¡Un cuarzo brillante!' }] };
+        l.scientificData = { 
+            hiddenItems: [
+                { id: 's1', label: 'Cristal', x: 30 + (i % 40), y: 40 + (i % 30), icon: 'fa-gem', desc: '¡Un cuarzo brillante encontrado en la expedición!' }
+            ] 
+        };
       } else {
         l.type = 'quiz';
         l.objective = "Misión " + i;
@@ -102,4 +121,4 @@ export const LEVELS: Level[] = (() => {
   return levels;
 })();
 
-export const MOTIVATIONAL_QUOTES = ["¡Eres genial!", "¡Lo lograste!", "¡Sigue así, Jana!"];
+export const MOTIVATIONAL_QUOTES = ["¡Eres brillante, Jana!", "¡Objetivo cumplido!", "¡Sigue explorando!", "¡Impresionante!", "¡Lo lograste!"];

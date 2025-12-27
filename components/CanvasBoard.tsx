@@ -1,7 +1,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { DrawingTool } from '../types';
-import { sounds } from '../utils/audio';
+import { DrawingTool } from '../types.ts';
+import { sounds } from '../utils/audio.ts';
 
 interface CanvasBoardProps {
   brushColor: string;
@@ -24,22 +24,25 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
-    // Inicialización limpia del lienzo
+    // Limpiar fondo
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Dibujar silueta si existe
     if (silhouette) {
-      const path = new Path2D(silhouette);
-      ctx.save();
-      ctx.strokeStyle = '#f1f5f9';
-      ctx.lineWidth = 12;
-      ctx.setLineDash([15, 15]);
-      ctx.stroke(path);
-      ctx.restore();
+      if (silhouette.startsWith('M')) {
+        // Es un path SVG
+        const path = new Path2D(silhouette);
+        ctx.save();
+        ctx.strokeStyle = '#f1f5f9';
+        ctx.lineWidth = 12;
+        ctx.setLineDash([15, 15]);
+        ctx.stroke(path);
+        ctx.restore();
+      }
     }
   }, [levelId, silhouette]);
 
-  // FUNCIÓN CRÍTICA: Mapeo exacto de coordenadas para táctil y mouse
   const getPos = (e: any) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -48,7 +51,6 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     
-    // Calcular el factor de escala real entre el tamaño CSS y el tamaño de dibujo del canvas
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
@@ -88,18 +90,17 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
     if (tool === 'eraser') {
       ctx.strokeStyle = 'white';
-      ctx.lineWidth = brushSize * 1.8;
+      ctx.lineWidth = brushSize * 2;
     } else if (tool === 'pencil') {
       ctx.strokeStyle = brushColor;
-      ctx.lineWidth = Math.max(3, brushSize / 6);
+      ctx.lineWidth = Math.max(3, brushSize / 4);
     } else if (tool === 'magic') {
-      // EFECTO ARCOÍRIS DINÁMICO
-      const nextHue = (hue + 12) % 360;
+      const nextHue = (hue + 10) % 360;
       setHue(nextHue);
-      ctx.strokeStyle = `hsl(${nextHue}, 100%, 55%)`;
+      ctx.strokeStyle = `hsl(${nextHue}, 100%, 60%)`;
       ctx.lineWidth = brushSize;
-      ctx.shadowBlur = 20;
-      ctx.shadowColor = `hsl(${nextHue}, 100%, 55%)`;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = `hsl(${nextHue}, 100%, 60%)`;
     } else {
       ctx.strokeStyle = brushColor;
       ctx.lineWidth = brushSize;
@@ -107,8 +108,7 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
     ctx.stroke();
     setLastPos(pos);
-    
-    if (Math.random() > 0.94) sounds.playPencil();
+    if (Math.random() > 0.95) sounds.playPencil();
   };
 
   const stopDrawing = () => {
@@ -167,7 +167,7 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     data[index + 3] = 255;
   };
 
-  const colorsMatch = (c1: number[], c2: number[], threshold = 22) => {
+  const colorsMatch = (c1: number[], c2: number[], threshold = 20) => {
     return Math.abs(c1[0] - c2[0]) <= threshold &&
            Math.abs(c1[1] - c2[1]) <= threshold &&
            Math.abs(c1[2] - c2[2]) <= threshold &&
@@ -185,6 +185,14 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
   return (
     <div className="w-full h-full flex-grow bg-white md:rounded-[2rem] shadow-inner overflow-hidden border-b-2 border-pink-100 cursor-none relative touch-none">
+      
+      {/* Silueta de icono para calcar */}
+      {silhouette && !silhouette.startsWith('M') && (
+        <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+           <i className={`fas ${silhouette} text-[20rem] md:text-[30rem]`}></i>
+        </div>
+      )}
+
       <canvas
         ref={canvasRef}
         width={800}
@@ -199,7 +207,6 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
         className="w-full h-full block object-contain bg-white cursor-none"
       />
       
-      {/* Indicador visual del pincel para Jana */}
       {isDrawing && tool !== 'fill' && (
         <div 
           className="fixed pointer-events-none rounded-full border-2 border-white shadow-lg z-[999]"
@@ -208,7 +215,7 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
             top: lastPos.y / (canvasRef.current?.height || 600) * 100 + '%',
             width: brushSize + 'px',
             height: brushSize + 'px',
-            backgroundColor: tool === 'magic' ? `hsl(${hue}, 100%, 55%)` : (tool === 'eraser' ? 'white' : brushColor),
+            backgroundColor: tool === 'magic' ? `hsl(${hue}, 100%, 60%)` : (tool === 'eraser' ? 'white' : brushColor),
             transform: 'translate(-50%, -50%)'
           }}
         />

@@ -30,29 +30,40 @@
         .font-fredoka {
             font-family: 'Fredoka One', cursive;
         }
-        @keyframes slide-up {
-          from { transform: translateY(20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        .animate-slide-up {
-          animation: slide-up 0.5s ease-out forwards;
-        }
-        .touch-lock {
-            touch-action: none !important;
-            -webkit-user-drag: none;
-        }
-        /* Custom scrollbar for content */
-        ::-webkit-scrollbar {
-          width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: rgba(236, 72, 153, 0.2);
-          border-radius: 10px;
+        #error-log {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 10px;
+            z-index: 9999;
+            max-height: 30%;
+            overflow-y: auto;
         }
     </style>
+    <script>
+        // Capturador de errores para APK
+        window.onerror = function(msg, url, line, col, error) {
+            var log = document.getElementById('error-log');
+            if (log) {
+                log.style.display = 'block';
+                log.innerHTML += '<div>ERROR: ' + msg + ' en ' + url + ':' + line + '</div>';
+            }
+            return false;
+        };
+        window.onunhandledrejection = function(event) {
+            var log = document.getElementById('error-log');
+            if (log) {
+                log.style.display = 'block';
+                log.innerHTML += '<div>PROMISE ERROR: ' + event.reason + '</div>';
+            }
+        };
+    </script>
     <script type="importmap">
     {
       "imports": {
@@ -67,6 +78,7 @@
 </head>
 <body class="m-0 p-0">
     <div id="root"></div>
+    <div id="error-log"></div>
     <script type="module" src="./index.tsx"></script>
 </body>
 </html>

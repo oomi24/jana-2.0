@@ -1,17 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
-import { ModuleId, UserProgress, Level, DrawingTool } from './types';
-import { WARRIORS, LEVELS, MOTIVATIONAL_QUOTES } from './constants';
-import CanvasBoard from './components/CanvasBoard';
-import QuizBoard from './components/QuizBoard';
-import MathBoard from './components/MathBoard';
-import LinguaBoard from './components/LinguaBoard';
-import ScienceBoard from './components/ScienceBoard';
-import GeoBoard from './components/GeoBoard';
-import ReadingBoard from './components/ReadingBoard';
-import IconButton from './components/IconButton';
-import { sounds } from './utils/audio';
-import { syncProgress } from './supabase';
+import { ModuleId, UserProgress, Level, DrawingTool } from './types.ts';
+import { WARRIORS, LEVELS, MOTIVATIONAL_QUOTES } from './constants.tsx';
+import CanvasBoard from './components/CanvasBoard.tsx';
+import QuizBoard from './components/QuizBoard.tsx';
+import MathBoard from './components/MathBoard.tsx';
+import LinguaBoard from './components/LinguaBoard.tsx';
+import ScienceBoard from './components/ScienceBoard.tsx';
+import GeoBoard from './components/GeoBoard.tsx';
+import ReadingBoard from './components/ReadingBoard.tsx';
+import IconButton from './components/IconButton.tsx';
+import { sounds } from './utils/audio.ts';
+import { syncProgress } from './supabase.ts';
 
 type Screen = 'splash' | 'menu' | 'levels' | 'game' | 'gallery';
 
