@@ -2,7 +2,8 @@
 class SoundManager {
   private ctx: AudioContext | null = null;
   private voicesLoaded: boolean = false;
-  private voice: any = null;
+  private voice: SpeechSynthesisVoice | null = null;
+  private initPromise: Promise<void> | null = null;
 
   constructor() {
     this.initVoices();
@@ -15,84 +16,87 @@ class SoundManager {
       try {
         const voices = window.speechSynthesis.getVoices();
         if (voices && voices.length > 0) {
-          // Intentamos encontrar una voz en español
+          // Buscamos voz en español, si no, la primera disponible
           this.voice = voices.find(v => v.lang.toLowerCase().includes('es-es') || v.lang.toLowerCase().includes('es-mx')) || voices[0];
           this.voicesLoaded = true;
         }
       } catch (e) {
-        console.error("Error cargando voces:", e);
+        console.error("Error al cargar voces:", e);
       }
     };
 
-    try {
-      if ('onvoiceschanged' in window.speechSynthesis) {
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-      }
-      loadVoices();
-    } catch (e) {}
-  }
-
-  public init() {
-    try {
-      if (!this.ctx) {
-        this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 44100 });
-      }
-      if (this.ctx.state === 'suspended') {
-        this.ctx.resume();
-      }
-    } catch (e) {}
+    if ('onvoiceschanged' in window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+    loadVoices();
   }
 
   public async unlockAudio() {
-    this.init();
-    
-    if (this.ctx) {
+    if (this.initPromise) return this.initPromise;
+
+    this.initPromise = (async () => {
       try {
-        const buffer = this.ctx.createBuffer(1, 1, 22050);
-        const node = this.ctx.createBufferSource();
-        node.buffer = buffer;
-        node.connect(this.ctx.destination);
-        node.start(0);
-        await this.ctx.resume();
-      } catch (e) {}
-    }
-    
-    try {
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-        const silence = new SpeechSynthesisUtterance("");
-        silence.volume = 0;
-        window.speechSynthesis.speak(silence);
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 44100 });
+        }
+        
+        if (this.ctx.state === 'suspended') {
+          await this.ctx.resume();
+        }
+
+        // Generar un pequeño sonido de 0.01s para "despertar" el hardware de audio en Android
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(0);
+        osc.stop(this.ctx.currentTime + 0.01);
+
+        // Despertar el motor de síntesis de voz con una cadena vacía
+        if (window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance("");
+          utterance.volume = 0;
+          window.speechSynthesis.speak(utterance);
+        }
+      } catch (e) {
+        console.warn("No se pudo desbloquear el audio automáticamente:", e);
       }
-    } catch (e) {}
+    })();
+
+    return this.initPromise;
   }
 
   public speak(text: string, rate: number = 0.9, lang: string = 'es-ES') {
     if (!window.speechSynthesis) return;
     
-    try {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(String(text));
-      
-      // Encontrar voz apropiada para el idioma
-      if (this.voicesLoaded) {
-        const voices = window.speechSynthesis.getVoices();
-        const targetVoice = voices.find(v => v.lang.toLowerCase().includes(lang.toLowerCase()));
-        if (targetVoice) utterance.voice = targetVoice;
-      }
+    // Forzar cancelación de cualquier voz previa para evitar colas infinitas
+    window.speechSynthesis.cancel();
 
-      utterance.lang = lang;
-      utterance.rate = rate;
-      utterance.pitch = 1.0;
-      utterance.volume = 1;
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.error("Error en TTS:", e);
-    }
+    setTimeout(() => {
+      try {
+        const utterance = new SpeechSynthesisUtterance(String(text));
+        
+        // Refrescar voces si no se han cargado
+        const voices = window.speechSynthesis.getVoices();
+        const targetVoice = voices.find(v => v.lang.toLowerCase().includes(lang.toLowerCase())) || this.voice;
+        
+        if (targetVoice) utterance.voice = targetVoice;
+        utterance.lang = lang;
+        utterance.rate = rate;
+        utterance.pitch = 1.0;
+        utterance.volume = 1;
+
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {
+        console.error("Fallo en SpeechSynthesis:", e);
+      }
+    }, 50); // Pequeño delay para asegurar que el canal esté libre
   }
 
   playClick() {
-    this.init();
+    this.unlockAudio();
     if (!this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
@@ -109,7 +113,7 @@ class SoundManager {
   }
 
   playSuccess() {
-    this.init();
+    this.unlockAudio();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
     try {
@@ -128,7 +132,7 @@ class SoundManager {
   }
 
   playWrong() {
-    this.init();
+    this.unlockAudio();
     if (!this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
@@ -143,7 +147,7 @@ class SoundManager {
   }
 
   playCelebration() {
-    this.init();
+    this.unlockAudio();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
     try {
@@ -160,7 +164,6 @@ class SoundManager {
   }
 
   playPencil() {
-    this.init();
     if (!this.ctx) return;
     try {
       const bufferSize = this.ctx.sampleRate * 0.02;
@@ -177,7 +180,6 @@ class SoundManager {
   }
 
   playEraser() {
-    this.init();
     if (!this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();

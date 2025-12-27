@@ -1,5 +1,7 @@
 {
   "name": "Academia del Aprendizaje: Jana Científica",
   "description": "Un juego educativo para Jana con 100 niveles por materia: Técnica, Lengua, Geografía, Naturaleza y Lectura.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }

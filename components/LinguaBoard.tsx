@@ -20,22 +20,20 @@ const LinguaBoard: React.FC<LinguaBoardProps> = ({ level, powerUps, onCorrect, o
 
   useEffect(() => {
     setUserInput('');
-    // Pequeño retardo para intentar sonar en APK si el usuario ya interactuó
-    const timer = setTimeout(() => {
-        if (level.question) {
-            try {
-                sounds.speak(level.question, 0.9, 'en-US');
-            } catch (e) {}
-        }
-    }, 800);
-    return () => clearTimeout(timer);
+    // Al cargar el nivel, esperamos un poco y avisamos que el audio está listo
+    // pero NO lo auto-reproducimos agresivamente para evitar bloqueos de Android.
+    // El primer sonido ocurrirá cuando Jana toque algo.
   }, [level.id]);
 
   const speak = (slow = false) => {
     if (!level.question) return;
-    setIsSpeaking(true);
-    sounds.speak(level.question, slow ? 0.5 : 0.9, 'en-US');
-    setTimeout(() => setIsSpeaking(false), 2000);
+    
+    // Desbloqueamos el audio context primero (crucial para APK)
+    sounds.unlockAudio().then(() => {
+      setIsSpeaking(true);
+      sounds.speak(level.question!, slow ? 0.5 : 0.9, 'en-US');
+      setTimeout(() => setIsSpeaking(false), 2000);
+    });
   };
 
   const handleKeyPress = (char: string) => {
@@ -91,6 +89,7 @@ const LinguaBoard: React.FC<LinguaBoardProps> = ({ level, powerUps, onCorrect, o
                 </p>
             </div>
         </div>
+        <p className="text-[10px] md:text-sm text-blue-400 font-bold">Toca el botón azul para escuchar</p>
       </div>
 
       <div className="w-full bg-white p-2 md:p-6 rounded-[1.5rem] md:rounded-[3rem] shadow-xl border-b-4 md:border-b-8 border-blue-100 shrink-0">
