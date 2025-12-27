@@ -35,6 +35,19 @@ const STORY_POOL = [
   }
 ];
 
+const SCIENCE_ITEMS = [
+  { label: 'Mariposa', icon: 'fa-bug', desc: 'Una mariposa monarca que viaja miles de kilómetros.' },
+  { label: 'Diamante', icon: 'fa-gem', desc: 'Un mineral precioso formado bajo mucha presión.' },
+  { label: 'ADN', icon: 'fa-dna', desc: 'Las instrucciones que dicen cómo somos los seres vivos.' },
+  { label: 'Planeta', icon: 'fa-globe', desc: 'Un mundo que gira alrededor del sol.' },
+  { label: 'Microscopio', icon: 'fa-microscope', desc: 'Herramienta para ver cosas muy pequeñas.' },
+  { label: 'Átomo', icon: 'fa-atom', desc: 'La pieza más pequeña de la que está hecho todo.' },
+  { label: 'Fósil', icon: 'fa-bone', desc: 'Restos de animales que vivieron hace millones de años.' },
+  { label: 'Hongo', icon: 'fa-mushroom', desc: 'Seres que ayudan a limpiar la naturaleza.' },
+  { label: 'Bacteria', icon: 'fa-bacteria', desc: 'Células diminutas que viven en todas partes.' },
+  { label: 'Imán', icon: 'fa-magnet', desc: 'Objeto que atrae el hierro con fuerza invisible.' }
+];
+
 export const LEVELS: Level[] = (() => {
   const levels: Level[] = [];
   const modules: ModuleId[] = ['color', 'math', 'english', 'geo', 'reading', 'science'];
@@ -78,9 +91,11 @@ export const LEVELS: Level[] = (() => {
             {q: "Apple", a: "Manzana", v: "fa-apple-alt", p: "ap-el"},
             {q: "Sun", a: "Sol", v: "fa-sun", p: "san"},
             {q: "Milk", a: "Leche", v: "fa-glass-whiskey", p: "milk"},
-            {q: "Water", a: "Agua", v: "fa-tint", p: "uater"}
+            {q: "Water", a: "Agua", v: "fa-tint", p: "uater"},
+            {q: "Book", a: "Libro", v: "fa-book", p: "buk"},
+            {q: "Pencil", a: "Lápiz", v: "fa-pencil-alt", p: "pén-sil"}
         ];
-        const word = engWords[i % engWords.length];
+        const word = engWords[(i - 1) % engWords.length];
         l.question = word.q;
         l.visual = word.v;
         l.answer = word.a;
@@ -103,17 +118,21 @@ export const LEVELS: Level[] = (() => {
         l.answer = n1 + n2;
       } else if (mod === 'science') {
         l.type = 'science-lab';
-        l.objective = "Exploradora Natural";
+        l.objective = "Científica Jana: Nivel " + i;
+        // Seleccionamos un ítem base y variamos su posición según el nivel i
+        const baseItem = SCIENCE_ITEMS[(i - 1) % SCIENCE_ITEMS.length];
         l.scientificData = { 
             hiddenItems: [
-                { id: 's1', label: 'Cristal', x: 30 + (i % 40), y: 40 + (i % 30), icon: 'fa-gem', desc: '¡Un cuarzo brillante encontrado en la expedición!' }
+                { 
+                  id: `sci_${i}`, 
+                  label: baseItem.label, 
+                  x: 20 + ((i * 17) % 60), 
+                  y: 20 + ((i * 23) % 60), 
+                  icon: baseItem.icon, 
+                  desc: baseItem.desc 
+                }
             ] 
         };
-      } else {
-        l.type = 'quiz';
-        l.objective = "Misión " + i;
-        l.question = "¿Listo para aprender?";
-        l.options = [{text: "¡Sí!", isCorrect: true}];
       }
       levels.push(l);
     }

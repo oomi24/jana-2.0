@@ -20,20 +20,22 @@ const LinguaBoard: React.FC<LinguaBoardProps> = ({ level, powerUps, onCorrect, o
 
   useEffect(() => {
     setUserInput('');
-    // Auto-pronunciación al iniciar el nivel
-    setTimeout(() => speak(), 600);
+    // Pequeño retardo para intentar sonar en APK si el usuario ya interactuó
+    const timer = setTimeout(() => {
+        if (level.question) {
+            try {
+                sounds.speak(level.question, 0.9, 'en-US');
+            } catch (e) {}
+        }
+    }, 800);
+    return () => clearTimeout(timer);
   }, [level.id]);
 
   const speak = (slow = false) => {
     if (!level.question) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(level.question);
-    utterance.lang = 'en-US';
-    utterance.rate = slow ? 0.5 : 0.9;
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(utterance);
-    sounds.playClick();
+    setIsSpeaking(true);
+    sounds.speak(level.question, slow ? 0.5 : 0.9, 'en-US');
+    setTimeout(() => setIsSpeaking(false), 2000);
   };
 
   const handleKeyPress = (char: string) => {
@@ -60,7 +62,6 @@ const LinguaBoard: React.FC<LinguaBoardProps> = ({ level, powerUps, onCorrect, o
   return (
     <div className="w-full h-full flex flex-col p-2 md:p-6 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden font-quicksand">
       
-      {/* Visualización de la palabra */}
       <div className="flex-grow flex flex-col items-center justify-center gap-2 md:gap-6 bg-white/80 backdrop-blur-md rounded-[1.5rem] md:rounded-[3rem] p-4 shadow-xl border-2 md:border-8 border-white mb-2 md:mb-6 overflow-hidden">
         
         <div className="text-5xl md:text-[10rem] animate-bounce-slow text-blue-500 drop-shadow-md">
@@ -69,10 +70,10 @@ const LinguaBoard: React.FC<LinguaBoardProps> = ({ level, powerUps, onCorrect, o
 
         <div className="text-center">
             <h3 className="text-3xl md:text-7xl font-fredoka text-gray-800 uppercase tracking-tight">
-                {level.question}
+                {String(level.question)}
             </h3>
             <p className="text-sm md:text-2xl text-blue-400 font-bold italic">
-               Pronunciación: /{eng?.pronunciation}/
+               Pronunciación: /{String(eng?.pronunciation)}/
             </p>
         </div>
 
@@ -92,7 +93,6 @@ const LinguaBoard: React.FC<LinguaBoardProps> = ({ level, powerUps, onCorrect, o
         </div>
       </div>
 
-      {/* Teclado responsivo */}
       <div className="w-full bg-white p-2 md:p-6 rounded-[1.5rem] md:rounded-[3rem] shadow-xl border-b-4 md:border-b-8 border-blue-100 shrink-0">
         <div className="grid grid-cols-7 sm:grid-cols-9 gap-1 md:gap-3">
           {letters.map(l => (

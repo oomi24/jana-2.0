@@ -14,6 +14,7 @@ interface CanvasBoardProps {
 
 const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, silhouette, levelId, onSave }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
   const [hue, setHue] = useState(0);
@@ -24,39 +25,41 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
-    // Limpiar fondo
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Ajustar resolución interna al tamaño del contenedor real
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, rect.width, rect.height);
+    };
 
-    // Dibujar silueta si existe
-    if (silhouette) {
-      if (silhouette.startsWith('M')) {
-        // Es un path SVG
-        const path = new Path2D(silhouette);
-        ctx.save();
-        ctx.strokeStyle = '#f1f5f9';
-        ctx.lineWidth = 12;
-        ctx.setLineDash([15, 15]);
-        ctx.stroke(path);
-        ctx.restore();
-      }
-    }
-  }, [levelId, silhouette]);
+    resize();
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
+  }, [levelId]);
 
   const getPos = (e: any) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+    let clientX, clientY;
 
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
+    // Retornar coordenadas relativas al elemento CSS (el contexto ya está escalado por dpr)
     return {
-      x: (clientX - rect.left) * scaleX,
-      y: (clientY - rect.top) * scaleY
+      x: clientX - rect.left,
+      y: clientY - rect.top
     };
   };
 
@@ -73,18 +76,16 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
   const draw = (e: any) => {
     if (!isDrawing || tool === 'fill') return;
-    if (e.cancelable) e.preventDefault();
-    
     const pos = getPos(e);
-    const ctx = canvasRef.current?.getContext('2d');
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     ctx.beginPath();
     ctx.moveTo(lastPos.x, lastPos.y);
     ctx.lineTo(pos.x, pos.y);
     
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1.0;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
@@ -93,13 +94,13 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
       ctx.lineWidth = brushSize * 2;
     } else if (tool === 'pencil') {
       ctx.strokeStyle = brushColor;
-      ctx.lineWidth = Math.max(3, brushSize / 4);
+      ctx.lineWidth = Math.max(2, brushSize / 4);
     } else if (tool === 'magic') {
-      const nextHue = (hue + 10) % 360;
+      const nextHue = (hue + 5) % 360;
       setHue(nextHue);
       ctx.strokeStyle = `hsl(${nextHue}, 100%, 60%)`;
       ctx.lineWidth = brushSize;
-      ctx.shadowBlur = 15;
+      ctx.shadowBlur = 10;
       ctx.shadowColor = `hsl(${nextHue}, 100%, 60%)`;
     } else {
       ctx.strokeStyle = brushColor;
@@ -108,7 +109,7 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
     ctx.stroke();
     setLastPos(pos);
-    if (Math.random() > 0.95) sounds.playPencil();
+    if (Math.random() > 0.98) sounds.playPencil();
   };
 
   const stopDrawing = () => {
@@ -120,24 +121,30 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
   const saveCanvas = () => {
     if (canvasRef.current) {
-      onSave(canvasRef.current.toDataURL('image/webp', 0.6));
+      onSave(canvasRef.current.toDataURL('image/webp', 0.5));
     }
   };
 
+  // Optimizamos FloodFill para el nuevo escalado
   const handleFloodFill = (startX: number, startY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Usamos coordenadas reales de pixeles para el algoritmo
+    const dpr = window.devicePixelRatio;
+    const realX = Math.round(startX * dpr);
+    const realY = Math.round(startY * dpr);
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
-    const targetColor = getPixelColor(data, startX, startY, canvas.width);
+    const targetColor = getPixelColor(data, realX, realY, canvas.width);
     const fillRGB = hexToRgb(brushColor);
     
     if (colorsMatch(targetColor, [fillRGB.r, fillRGB.g, fillRGB.b, 255])) return;
 
-    const pixelsToCheck = [[startX, startY]];
+    const pixelsToCheck = [[realX, realY]];
     while (pixelsToCheck.length > 0) {
       const [x, y] = pixelsToCheck.pop()!;
       const currentColor = getPixelColor(data, x, y, canvas.width);
@@ -167,11 +174,10 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     data[index + 3] = 255;
   };
 
-  const colorsMatch = (c1: number[], c2: number[], threshold = 20) => {
+  const colorsMatch = (c1: number[], c2: number[], threshold = 30) => {
     return Math.abs(c1[0] - c2[0]) <= threshold &&
            Math.abs(c1[1] - c2[1]) <= threshold &&
-           Math.abs(c1[2] - c2[2]) <= threshold &&
-           Math.abs(c1[3] - c2[3]) <= threshold;
+           Math.abs(c1[2] - c2[2]) <= threshold;
   };
 
   const hexToRgb = (hex: string) => {
@@ -184,19 +190,14 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
   };
 
   return (
-    <div className="w-full h-full flex-grow bg-white md:rounded-[2rem] shadow-inner overflow-hidden border-b-2 border-pink-100 cursor-none relative touch-none">
-      
-      {/* Silueta de icono para calcar */}
+    <div ref={containerRef} className="w-full h-full flex-grow bg-white md:rounded-[2rem] shadow-inner overflow-hidden relative touch-none">
       {silhouette && !silhouette.startsWith('M') && (
         <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
            <i className={`fas ${silhouette} text-[20rem] md:text-[30rem]`}></i>
         </div>
       )}
-
       <canvas
         ref={canvasRef}
-        width={800}
-        height={600}
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}
@@ -204,29 +205,14 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
         onTouchStart={startDrawing}
         onTouchMove={draw}
         onTouchEnd={stopDrawing}
-        className="w-full h-full block object-contain bg-white cursor-none"
+        className="w-full h-full block cursor-none"
       />
-      
-      {isDrawing && tool !== 'fill' && (
-        <div 
-          className="fixed pointer-events-none rounded-full border-2 border-white shadow-lg z-[999]"
-          style={{ 
-            left: lastPos.x / (canvasRef.current?.width || 800) * 100 + '%', 
-            top: lastPos.y / (canvasRef.current?.height || 600) * 100 + '%',
-            width: brushSize + 'px',
-            height: brushSize + 'px',
-            backgroundColor: tool === 'magic' ? `hsl(${hue}, 100%, 60%)` : (tool === 'eraser' ? 'white' : brushColor),
-            transform: 'translate(-50%, -50%)'
-          }}
-        />
-      )}
-
       <button 
         onClick={() => {
           const ctx = canvasRef.current?.getContext('2d');
           if(ctx && canvasRef.current) {
             ctx.fillStyle = 'white';
-            ctx.fillRect(0,0,800,600);
+            ctx.fillRect(0,0,canvasRef.current.width, canvasRef.current.height);
             sounds.playEraser();
             saveCanvas();
           }
