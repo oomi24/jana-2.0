@@ -44,18 +44,17 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
   };
 
   const handleSpeak = () => {
-    window.speechSynthesis.cancel();
     if (isSpeaking) {
+      window.speechSynthesis.cancel();
       setIsSpeaking(false);
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(story.content);
-    utterance.lang = 'es-ES';
-    utterance.rate = 0.9;
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(utterance);
-    sounds.playClick();
+    setIsSpeaking(true);
+    sounds.speak(story.content, 0.85);
+    
+    // Timer de seguridad para el estado del botón
+    const approxTime = (story.content.length / 15) * 1000;
+    setTimeout(() => setIsSpeaking(false), approxTime);
   };
 
   const checkAnswers = () => {
@@ -69,16 +68,10 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
     }
   };
 
-  const stats = {
-    words: story.content.split(/\s+/).length,
-    speed: Math.round(story.content.split(/\s+/).length / (parseInt(story.estimatedTime) || 1)),
-    paragraphs: story.content.split(/\n\n/).length
-  };
-
   return (
     <div className="w-full h-full flex flex-col p-2 md:p-6 bg-[#f0f2f5] overflow-hidden font-quicksand">
       
-      {/* HUD Superior con Botón de Test Directo */}
+      {/* HUD Superior */}
       <div className="flex flex-wrap justify-center md:justify-between items-center gap-2 mb-4 bg-white/80 backdrop-blur-md p-3 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-gray-100">
          <div className="flex items-center gap-3">
             <div className="relative w-12 h-12 md:w-16 md:h-16">
@@ -102,7 +95,7 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
             ) : (
               <IconButton icon="fa-book-open" onClick={() => { sounds.playClick(); setCurrentStep('reading'); }} colorClass="bg-purple-500" label="Lectura" />
             )}
-            <IconButton icon={isSpeaking ? "fa-stop" : "fa-volume-up"} onClick={handleSpeak} colorClass="bg-blue-500" label="Voz" />
+            <IconButton icon={isSpeaking ? "fa-stop" : "fa-volume-up"} onClick={handleSpeak} colorClass={isSpeaking ? "bg-red-500" : "bg-blue-500"} label="Voz" />
             <IconButton icon="fa-brain" onClick={() => setShowAnalysis(!showAnalysis)} colorClass="bg-orange-400" label="Análisis" />
          </div>
       </div>
@@ -127,7 +120,6 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
                       ))}
                    </div>
                    
-                   {/* Botón final de lectura para pasar al test */}
                    <div className="mt-16 flex justify-center pb-12">
                       <button 
                         onClick={() => { sounds.playCelebration(); setCurrentStep('exercises'); }}
@@ -139,12 +131,8 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
                 </article>
               ) : (
                 <div className="animate-slide-up space-y-8 md:space-y-12 max-w-4xl mx-auto py-4 pb-20">
-                   <div className="text-center mb-10">
-                      <h2 className="text-2xl md:text-5xl font-fredoka text-purple-600 uppercase">Test de Comprensión</h2>
-                      <p className="text-gray-400 font-bold uppercase text-[10px] md:text-sm tracking-widest">Demuestra lo que aprendiste</p>
-                   </div>
                    {story.questions.map((q, qIdx) => (
-                     <div key={qIdx} className="bg-purple-50/50 p-6 md:p-10 rounded-[2.5rem] border-2 border-purple-100">
+                     <div key={qIdx} className="bg-purple-50/50 p-6 md:p-10 rounded-[2.5rem] border-2 border-purple-100 shadow-sm">
                         <p className="text-xl md:text-3xl font-bold text-gray-800 mb-6 flex gap-4">
                            <span className="bg-purple-600 text-white w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">{qIdx + 1}</span>
                            {q.question}
@@ -179,29 +167,6 @@ const ReadingBoard: React.FC<ReadingBoardProps> = ({ level, onCorrect, onWrong }
               )}
            </div>
         </div>
-
-        {showAnalysis && (
-          <aside className="w-full lg:w-80 flex flex-col gap-4 animate-fade-in">
-             <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-lg border border-gray-100 h-full overflow-y-auto">
-                <h3 className="text-xl font-fredoka text-purple-600 mb-6 border-b pb-2 flex items-center gap-2">
-                   <i className="fas fa-microscope"></i> Laboratorio
-                </h3>
-                <div className="space-y-6">
-                   <section>
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Vocabulario</p>
-                      <div className="flex flex-col gap-3">
-                         {story.vocabulary.map((v, i) => (
-                           <div key={i}>
-                              <p className="text-sm md:text-lg font-bold text-purple-500 underline decoration-dotted">{v.word}</p>
-                              <p className="text-[10px] md:text-xs text-gray-500 bg-gray-50 p-2 rounded-lg mt-1">{v.meaning}</p>
-                           </div>
-                         ))}
-                      </div>
-                   </section>
-                </div>
-             </div>
-          </aside>
-        )}
       </div>
 
       <style>{`

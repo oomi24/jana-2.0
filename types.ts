@@ -39,6 +39,8 @@ export interface Level {
   };
   readingData?: {
     title: string;
+    author: string;
+    estimatedTime: string;
     content: string;
     vocabulary: { word: string, meaning: string }[];
     questions: { question: string, options: string[], correct: number }[];

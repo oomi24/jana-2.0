@@ -10,84 +10,91 @@ export const WARRIORS: Record<ModuleId, Warrior> = {
   science: { id: 'science', name: 'NATURALEZA', title: 'Científica Natural', subject: 'Ciencias y Vida', color: '#10b981', gradient: 'from-emerald-400 to-teal-600', description: 'Descubre el mundo.', icon: 'fa-leaf' },
 };
 
-const SCIENCE_POOL = [
-  { label: 'Cuarzo', icon: 'fa-gem', category: 'mineral', symbols: ['SiO2'] },
-  { label: 'Pirita', icon: 'fa-cube', category: 'mineral', symbols: ['FeS2'] },
-  { label: 'Diamante', icon: 'fa-diamond', category: 'mineral', symbols: ['C'] },
-  { label: 'Mariposa', icon: 'fa-bug', category: 'animal', symbols: ['INS'] },
-  { label: 'Colibrí', icon: 'fa-dove', category: 'animal', symbols: ['AVI'] },
-  { label: 'Helecho', icon: 'fa-leaf', category: 'plant', symbols: ['PTE'] },
-  { label: 'Orquídea', icon: 'fa-seedling', category: 'plant', symbols: ['ORQ'] },
-  { label: 'Nebulosa', icon: 'fa-cloud-meatball', category: 'space', symbols: ['NEB'] },
-  { label: 'Galaxia', icon: 'fa-bahai', category: 'space', symbols: ['GAL'] }
+// --- BASE DE DATOS DE LECTURA ---
+const STORY_POOL = [
+  {
+    title: "El Viaje del Colibrí Mágico",
+    author: "Academia Jana",
+    time: "2 min",
+    content: "Había una vez un colibrí de alas brillantes que vivía en el Salto Ángel. Sus alas eran de color fucsia y turquesa. Un día, decidió volar hasta el Ávila para saludar a las nubes. En su viaje, descubrió que las flores de Venezuela tenían los aromas más dulces del mundo. Las nubes le regalaron un rayito de sol para que sus plumas siempre brillaran.",
+    vocab: [{word: "Fucsia", meaning: "Un color rosado muy intenso y brillante."}, {word: "Aroma", meaning: "Un olor muy agradable, como el de las flores."}],
+    questions: [
+      { q: "¿De qué colores eran las alas del colibrí?", o: ["Rojo y Gris", "Fucsia y Turquesa", "Blanco"], c: 1 },
+      { q: "¿A dónde decidió volar el colibrí?", o: ["Al mar", "Al Ávila", "A la selva"], c: 1 }
+    ]
+  },
+  {
+    title: "La Estrellita Curiosa",
+    author: "Misión Espacial",
+    time: "3 min",
+    content: "En el cielo nocturno vivía Estrellita, una luz muy inquieta. Ella quería saber por qué los planetas daban vueltas. Un día, le preguntó a la Luna: '¿Por qué no te quedas quieta?'. La Luna sonrió y le explicó que todo en el espacio baila al ritmo de la gravedad. Estrellita comprendió que ella también era parte de ese gran baile cósmico.",
+    vocab: [{word: "Cósmico", meaning: "Que pertenece al espacio o al universo."}, {word: "Gravedad", meaning: "La fuerza que nos mantiene pegados a la tierra."}],
+    questions: [
+      { q: "¿Quién le explicó a Estrellita el baile del espacio?", o: ["El Sol", "La Luna", "Un astronauta"], c: 1 },
+      { q: "¿Qué descubrió Estrellita sobre el espacio?", o: ["Que es aburrido", "Que todo baila con la gravedad", "Que no tiene luces"], c: 1 }
+    ]
+  }
 ];
-
-const ADJECTIVES = ['Brillante', 'Raro', 'Gigante', 'Misterioso', 'Espacial', 'Fósil', 'Cristalino'];
-
-const generateScienceItems = (level: number) => {
-  const items = [];
-  const seed = level * 31; // Salto mayor para evitar colisiones
-  for (let i = 0; i < 4; i++) {
-    const base = SCIENCE_POOL[(seed + i * 7) % SCIENCE_POOL.length];
-    const adj = ADJECTIVES[(seed * (i + 3)) % ADJECTIVES.length];
-    items.push({
-      id: `sci_${level}_${i}`,
-      label: `${adj} ${base.label}`,
-      symbol: base.symbols[0],
-      desc: `Misión ${level}: Un ejemplar de ${base.label} detectado.`,
-      icon: base.icon,
-      category: base.category,
-      x: 15 + ((seed + i * 19) % 70),
-      y: 15 + ((seed * (i + 2) + 13) % 70)
-    });
-  }
-  return items;
-};
-
-const getMathChallenge = (i: number) => {
-  const seed = i * 67;
-  if (i <= 50) {
-    // Sumas y restas complejas (Llevadas)
-    const isSum = i % 2 === 0;
-    const n1 = 1200 + (seed % 7800);
-    const n2 = 450 + (seed % 4500);
-    if (isSum) return { q: `${n1} + ${n2}`, a: n1 + n2, op: '+', v1: n1, v2: n2 };
-    const v1 = Math.max(n1, n2); const v2 = Math.min(n1, n2);
-    return { q: `${v1} - ${v2}`, a: v1 - v2, op: '-', v1, v2 };
-  } else {
-    // Multiplicación y División para 8-10 años
-    const isMult = i % 2 === 0;
-    if (isMult) {
-      const v1 = 110 + (seed % 390);
-      const v2 = 2 + (seed % 7);
-      return { q: `${v1} x ${v2}`, a: v1 * v2, op: 'x', v1, v2 };
-    } else {
-      const v2 = 4 + (seed % 5);
-      const v1 = v2 * (15 + (seed % 40));
-      return { q: `${v1} ÷ ${v2}`, a: v1 / v2, op: '÷', v1, v2 };
-    }
-  }
-};
 
 export const LEVELS: Level[] = (() => {
   const levels: Level[] = [];
   const modules: ModuleId[] = ['color', 'math', 'english', 'geo', 'reading', 'science'];
+  
   modules.forEach(mod => {
     for (let i = 1; i <= 100; i++) {
-      let l: any = { id: `${mod}_${i}`, moduleId: mod, index: i, rewardId: `r_${i}`, help: "¡Tú puedes!" };
-      if (mod === 'math') {
-        const c = getMathChallenge(i);
+      let l: any = { 
+        id: `${mod}_${i}`, 
+        moduleId: mod, 
+        index: i, 
+        rewardId: `r_${i}`, 
+        help: "¡Tú puedes, Jana!" 
+      };
+      
+      if (mod === 'reading') {
+        const s = STORY_POOL[(i - 1) % STORY_POOL.length];
+        l.type = 'reading-adventure';
+        l.objective = `Misión Lectura: ${s.title}`;
+        l.readingData = {
+          title: s.title,
+          author: s.author,
+          estimatedTime: s.time,
+          content: s.content,
+          vocabulary: s.vocab,
+          questions: s.questions.map(q => ({
+            question: q.q,
+            options: q.o,
+            correct: q.c
+          }))
+        };
+      } else if (mod === 'english') {
+        l.type = 'lingua-flow';
+        l.objective = "Vocabulario Inglés";
+        l.question = "Cat"; l.visual = "fa-cat"; l.answer = "Gato";
+        l.englishData = { pronunciation: "kat", category: "Animales" };
+      } else if (mod === 'geo') {
+        l.type = 'quiz';
+        l.objective = "Explora Venezuela";
+        l.question = "¿Dónde está el Salto Ángel?";
+        l.visual = "fa-water";
+        l.options = [{text: "Bolívar", isCorrect: true}, {text: "Zulia", isCorrect: false}];
+        l.answer = "Es la cascada más alta del mundo.";
+      } else if (mod === 'math') {
+        const seed = i * 67;
+        const n1 = 100 + (seed % 900);
+        const n2 = 50 + (seed % 400);
         l.type = 'math-master';
-        l.objective = i <= 50 ? "Aritmética" : "Cálculo";
-        l.answer = c.a; l.mathData = { op: c.op, v1: c.v1, v2: c.v2 };
+        l.objective = "Cálculo Mental";
+        l.mathData = { op: '+', v1: n1, v2: n2 };
+        l.answer = n1 + n2;
       } else if (mod === 'science') {
         l.type = 'science-lab';
-        l.objective = "Exploración N-" + i;
-        l.scientificData = { hiddenItems: generateScienceItems(i) };
+        l.objective = "Exploradora Natural";
+        l.scientificData = { hiddenItems: [{ id: 's1', label: 'Cristal', x: 50, y: 50, icon: 'fa-gem', desc: '¡Un cuarzo brillante!' }] };
       } else {
         l.type = 'quiz';
-        l.objective = "Lección " + i;
-        l.question = "¿Listo?"; l.options = [{text: "Sí", isCorrect: true}];
+        l.objective = "Misión " + i;
+        l.question = "¿Listo para aprender?";
+        l.options = [{text: "¡Sí!", isCorrect: true}];
       }
       levels.push(l);
     }
@@ -95,4 +102,4 @@ export const LEVELS: Level[] = (() => {
   return levels;
 })();
 
-export const MOTIVATIONAL_QUOTES = ["¡Excelente!", "¡Eres una genia!", "¡Misión lograda!"];
+export const MOTIVATIONAL_QUOTES = ["¡Eres genial!", "¡Lo lograste!", "¡Sigue así, Jana!"];
