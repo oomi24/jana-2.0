@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
     <title>Jana Científica: Academia del Aprendizaje</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
@@ -41,20 +42,13 @@
             }
             return false;
         };
-        window.onunhandledrejection = function(event) {
-            var consoleDiv = document.getElementById('debug-console');
-            if (consoleDiv) {
-                consoleDiv.style.display = 'block';
-                consoleDiv.innerHTML += '<div style="color: #ffaa00;">[PROMISE] ' + (event.reason || 'Error') + '</div>';
-            }
-        };
         setTimeout(function() {
             var loader = document.getElementById('loading');
             if (loader && loader.style.opacity !== '0') {
                 loader.style.opacity = '0';
                 setTimeout(function() { loader.remove(); }, 500);
             }
-        }, 4000);
+        }, 2000);
     </script>
     <script type="importmap">
     {
@@ -71,7 +65,7 @@
 <body>
     <div id="loading" class="loading-screen">
         <i class="fas fa-atom fa-spin text-6xl mb-4"></i>
-        <h1 style="font-family: 'Fredoka One', cursive;">CARGANDO ACADEMIA...</h1>
+        <h1 style="font-family: 'Fredoka One', cursive;">CIENTÍFICA JANA...</h1>
     </div>
     <div id="root"></div>
     <div id="debug-console"></div>

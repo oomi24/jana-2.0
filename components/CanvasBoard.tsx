@@ -25,9 +25,9 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
-    // Ajustar resolución interna al tamaño del contenedor real
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
+      // Usamos el tamaño real del elemento en el DOM
       canvas.width = rect.width * window.devicePixelRatio;
       canvas.height = rect.height * window.devicePixelRatio;
       ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
@@ -56,10 +56,10 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
       clientY = e.clientY;
     }
 
-    // Retornar coordenadas relativas al elemento CSS (el contexto ya está escalado por dpr)
+    // El cálculo debe ser relativo al BoundingClientRect para evitar desfases
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
+      x: (clientX - rect.left),
+      y: (clientY - rect.top)
     };
   };
 
@@ -67,7 +67,7 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     if (e.cancelable) e.preventDefault();
     const pos = getPos(e);
     if (tool === 'fill') {
-      handleFloodFill(Math.round(pos.x), Math.round(pos.y));
+      handleFloodFill(pos.x, pos.y);
       return;
     }
     setIsDrawing(true);
@@ -92,16 +92,11 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     if (tool === 'eraser') {
       ctx.strokeStyle = 'white';
       ctx.lineWidth = brushSize * 2;
-    } else if (tool === 'pencil') {
-      ctx.strokeStyle = brushColor;
-      ctx.lineWidth = Math.max(2, brushSize / 4);
     } else if (tool === 'magic') {
       const nextHue = (hue + 5) % 360;
       setHue(nextHue);
       ctx.strokeStyle = `hsl(${nextHue}, 100%, 60%)`;
       ctx.lineWidth = brushSize;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = `hsl(${nextHue}, 100%, 60%)`;
     } else {
       ctx.strokeStyle = brushColor;
       ctx.lineWidth = brushSize;
@@ -109,84 +104,66 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
     ctx.stroke();
     setLastPos(pos);
-    if (Math.random() > 0.98) sounds.playPencil();
+    if (Math.random() > 0.95) sounds.playPencil();
   };
 
   const stopDrawing = () => {
     if (isDrawing) {
       setIsDrawing(false);
-      saveCanvas();
+      onSave(canvasRef.current!.toDataURL('image/webp', 0.5));
     }
   };
 
-  const saveCanvas = () => {
-    if (canvasRef.current) {
-      onSave(canvasRef.current.toDataURL('image/webp', 0.5));
-    }
-  };
-
-  // Optimizamos FloodFill para el nuevo escalado
   const handleFloodFill = (startX: number, startY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Usamos coordenadas reales de pixeles para el algoritmo
     const dpr = window.devicePixelRatio;
-    const realX = Math.round(startX * dpr);
-    const realY = Math.round(startY * dpr);
+    const x = Math.round(startX * dpr);
+    const y = Math.round(startY * dpr);
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    const targetColor = getPixelColor(data, realX, realY, canvas.width);
-    const fillRGB = hexToRgb(brushColor);
-    
-    if (colorsMatch(targetColor, [fillRGB.r, fillRGB.g, fillRGB.b, 255])) return;
+    const targetColor = getPixel(imageData, x, y);
+    const fillColor = hexToRgb(brushColor);
 
-    const pixelsToCheck = [[realX, realY]];
-    while (pixelsToCheck.length > 0) {
-      const [x, y] = pixelsToCheck.pop()!;
-      const currentColor = getPixelColor(data, x, y, canvas.width);
-      if (colorsMatch(currentColor, targetColor)) {
-        setPixelColor(data, x, y, canvas.width, fillRGB);
-        if (x > 0) pixelsToCheck.push([x - 1, y]);
-        if (x < canvas.width - 1) pixelsToCheck.push([x + 1, y]);
-        if (y > 0) pixelsToCheck.push([x, y - 1]);
-        if (y < canvas.height - 1) pixelsToCheck.push([x, y + 1]);
+    if (colorsMatch(targetColor, [fillColor.r, fillColor.g, fillColor.b, 255])) return;
+
+    const pixels = [[x, y]];
+    while (pixels.length > 0) {
+      const [px, py] = pixels.pop()!;
+      if (colorsMatch(getPixel(imageData, px, py), targetColor)) {
+        setPixel(imageData, px, py, fillColor);
+        if (px > 0) pixels.push([px - 1, py]);
+        if (px < canvas.width - 1) pixels.push([px + 1, py]);
+        if (py > 0) pixels.push([px, py - 1]);
+        if (py < canvas.height - 1) pixels.push([px, py + 1]);
       }
     }
     ctx.putImageData(imageData, 0, 0);
     sounds.playSuccess();
-    saveCanvas();
   };
 
-  const getPixelColor = (data: Uint8ClampedArray, x: number, y: number, width: number) => {
-    const index = (y * width + x) * 4;
-    return [data[index], data[index + 1], data[index + 2], data[index + 3]];
+  const getPixel = (img: ImageData, x: number, y: number) => {
+    const i = (y * img.width + x) * 4;
+    return [img.data[i], img.data[i+1], img.data[i+2], img.data[i+3]];
   };
 
-  const setPixelColor = (data: Uint8ClampedArray, x: number, y: number, width: number, color: {r:number, g:number, b:number}) => {
-    const index = (y * width + x) * 4;
-    data[index] = color.r;
-    data[index + 1] = color.g;
-    data[index + 2] = color.b;
-    data[index + 3] = 255;
+  const setPixel = (img: ImageData, x: number, y: number, color: any) => {
+    const i = (y * img.width + x) * 4;
+    img.data[i] = color.r; img.data[i+1] = color.g; img.data[i+2] = color.b; img.data[i+3] = 255;
   };
 
-  const colorsMatch = (c1: number[], c2: number[], threshold = 30) => {
-    return Math.abs(c1[0] - c2[0]) <= threshold &&
-           Math.abs(c1[1] - c2[1]) <= threshold &&
-           Math.abs(c1[2] - c2[2]) <= threshold;
+  const colorsMatch = (c1: number[], c2: number[]) => {
+    return Math.abs(c1[0]-c2[0])<20 && Math.abs(c1[1]-c2[1])<20 && Math.abs(c1[2]-c2[2])<20;
   };
 
   const hexToRgb = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : { r: 0, g: 0, b: 0 };
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return { r, g, b };
   };
 
   return (
@@ -201,26 +178,11 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}
-        onMouseLeave={stopDrawing}
         onTouchStart={startDrawing}
         onTouchMove={draw}
         onTouchEnd={stopDrawing}
         className="w-full h-full block cursor-none"
       />
-      <button 
-        onClick={() => {
-          const ctx = canvasRef.current?.getContext('2d');
-          if(ctx && canvasRef.current) {
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0,0,canvasRef.current.width, canvasRef.current.height);
-            sounds.playEraser();
-            saveCanvas();
-          }
-        }}
-        className="absolute bottom-4 right-4 w-12 h-12 md:w-16 md:h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-transform z-30"
-      >
-        <i className="fas fa-trash-alt text-xl"></i>
-      </button>
     </div>
   );
 };
