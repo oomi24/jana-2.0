@@ -7,12 +7,11 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 let supabase: any = null;
 
 try {
-  // Solo inicializar si estamos en un entorno con red o navegador funcional
   if (typeof window !== 'undefined') {
     supabase = createClient(supabaseUrl, supabaseAnonKey);
   }
 } catch (e) {
-  console.warn("Supabase client could not be initialized");
+  console.warn("Supabase no pudo inicializarse, trabajando en modo local.");
 }
 
 export { supabase };
@@ -29,9 +28,9 @@ export const syncProgress = async (userId: string, progress: any) => {
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
 
-    if (error) console.warn('Supabase Sync Status:', error.message);
+    if (error) console.log('Sincronización Supabase:', error.message);
   } catch (err) {
-    // Silencioso para no interrumpir a Jana si no hay wifi
-    console.log('Supabase sync skipped (offline)');
+    // Silencioso para modo offline en APK
+    console.log('Modo Offline: Sincronización omitida.');
   }
 };

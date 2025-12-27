@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>Academia del Aprendizaje: Jana Científica</title>
+    <title>Jana Científica: Academia del Aprendizaje</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -15,52 +14,39 @@
         body {
             font-family: 'Quicksand', sans-serif;
             background: #fdf2f8; 
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            margin: 0; padding: 0;
             overflow: hidden;
-            position: fixed; 
-            width: 100%;
-            height: 100%;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            position: fixed; width: 100%; height: 100%;
         }
-        #root {
-            height: 100%;
-            width: 100%;
+        #root { width: 100%; height: 100%; }
+        #debug-console {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(0,0,0,0.9); color: #0f0;
+            font-family: monospace; font-size: 10px;
+            z-index: 9999; max-height: 40%; overflow-y: auto;
+            display: none; padding: 10px; pointer-events: none;
         }
-        .font-fredoka {
-            font-family: 'Fredoka One', cursive;
-        }
-        #error-log {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            font-family: monospace;
-            font-size: 10px;
-            padding: 10px;
-            z-index: 9999;
-            max-height: 30%;
-            overflow-y: auto;
+        .loading-screen {
+            position: fixed; inset: 0; background: #ec4899;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; z-index: 9998; transition: opacity 0.5s;
         }
     </style>
     <script>
-        // Capturador de errores para APK
+        // Capturador de errores crítico para APK
         window.onerror = function(msg, url, line, col, error) {
-            var log = document.getElementById('error-log');
-            if (log) {
-                log.style.display = 'block';
-                log.innerHTML += '<div>ERROR: ' + msg + ' en ' + url + ':' + line + '</div>';
+            var console = document.getElementById('debug-console');
+            if (console) {
+                console.style.display = 'block';
+                console.innerHTML += '<div>[ERROR] ' + msg + ' (' + line + ':' + col + ')</div>';
             }
             return false;
         };
         window.onunhandledrejection = function(event) {
-            var log = document.getElementById('error-log');
-            if (log) {
-                log.style.display = 'block';
-                log.innerHTML += '<div>PROMISE ERROR: ' + event.reason + '</div>';
+            var console = document.getElementById('debug-console');
+            if (console) {
+                console.style.display = 'block';
+                console.innerHTML += '<div>[PROMISE] ' + (event.reason || 'Error desconocido') + '</div>';
             }
         };
     </script>
@@ -76,9 +62,23 @@
     }
     </script>
 </head>
-<body class="m-0 p-0">
+<body>
+    <div id="loading" class="loading-screen">
+        <i class="fas fa-atom fa-spin text-6xl mb-4"></i>
+        <h1 style="font-family: 'Fredoka One', cursive;">CARGANDO ACADEMIA...</h1>
+    </div>
     <div id="root"></div>
-    <div id="error-log"></div>
-    <script type="module" src="./index.tsx"></script>
+    <div id="debug-console"></div>
+    <script type="module">
+        import './index.tsx';
+        // Ocultar cargador cuando React tome el control
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const loader = document.getElementById('loading');
+                if (loader) loader.style.opacity = '0';
+                setTimeout(() => loader && loader.remove(), 500);
+            }, 1500);
+        });
+    </script>
 </body>
 </html>
