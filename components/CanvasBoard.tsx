@@ -27,10 +27,14 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      // Usamos el tamaño real del elemento en el DOM
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      const dpr = window.devicePixelRatio || 1;
+      
+      // Dimensiones lógicas vs dimensiones de buffer
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      
+      // Ajustar escala del contexto para que las coordenadas JS coincidan con las CSS
+      ctx.scale(dpr, dpr);
       
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, rect.width, rect.height);
@@ -56,10 +60,10 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
       clientY = e.clientY;
     }
 
-    // El cálculo debe ser relativo al BoundingClientRect para evitar desfases
+    // Retornamos la posición relativa al elemento canvas en coordenadas CSS
     return {
-      x: (clientX - rect.left),
-      y: (clientY - rect.top)
+      x: clientX - rect.left,
+      y: clientY - rect.top
     };
   };
 
@@ -91,12 +95,15 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
     if (tool === 'eraser') {
       ctx.strokeStyle = 'white';
-      ctx.lineWidth = brushSize * 2;
+      ctx.lineWidth = brushSize * 1.5;
     } else if (tool === 'magic') {
-      const nextHue = (hue + 5) % 360;
+      const nextHue = (hue + 4) % 360;
       setHue(nextHue);
       ctx.strokeStyle = `hsl(${nextHue}, 100%, 60%)`;
       ctx.lineWidth = brushSize;
+    } else if (tool === 'pencil') {
+      ctx.strokeStyle = brushColor;
+      ctx.lineWidth = Math.max(2, brushSize / 4);
     } else {
       ctx.strokeStyle = brushColor;
       ctx.lineWidth = brushSize;
@@ -104,7 +111,7 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
 
     ctx.stroke();
     setLastPos(pos);
-    if (Math.random() > 0.95) sounds.playPencil();
+    if (Math.random() > 0.96) sounds.playPencil();
   };
 
   const stopDrawing = () => {
@@ -120,7 +127,8 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const dpr = window.devicePixelRatio;
+    const dpr = window.devicePixelRatio || 1;
+    // Debemos trabajar en coordenadas de PIXEL reales para el algoritmo
     const x = Math.round(startX * dpr);
     const y = Math.round(startY * dpr);
 
@@ -128,21 +136,26 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
     const targetColor = getPixel(imageData, x, y);
     const fillColor = hexToRgb(brushColor);
 
+    // Evitar bucle infinito si el color es el mismo
     if (colorsMatch(targetColor, [fillColor.r, fillColor.g, fillColor.b, 255])) return;
 
     const pixels = [[x, y]];
+    const width = canvas.width;
+    const height = canvas.height;
+
     while (pixels.length > 0) {
       const [px, py] = pixels.pop()!;
       if (colorsMatch(getPixel(imageData, px, py), targetColor)) {
         setPixel(imageData, px, py, fillColor);
         if (px > 0) pixels.push([px - 1, py]);
-        if (px < canvas.width - 1) pixels.push([px + 1, py]);
+        if (px < width - 1) pixels.push([px + 1, py]);
         if (py > 0) pixels.push([px, py - 1]);
-        if (py < canvas.height - 1) pixels.push([px, py + 1]);
+        if (py < height - 1) pixels.push([px, py + 1]);
       }
     }
     ctx.putImageData(imageData, 0, 0);
     sounds.playSuccess();
+    onSave(canvas.toDataURL('image/webp', 0.5));
   };
 
   const getPixel = (img: ImageData, x: number, y: number) => {
@@ -156,14 +169,16 @@ const CanvasBoard: React.FC<CanvasBoardProps> = ({ brushColor, brushSize, tool, 
   };
 
   const colorsMatch = (c1: number[], c2: number[]) => {
-    return Math.abs(c1[0]-c2[0])<20 && Math.abs(c1[1]-c2[1])<20 && Math.abs(c1[2]-c2[2])<20;
+    return Math.abs(c1[0]-c2[0])<25 && Math.abs(c1[1]-c2[1])<25 && Math.abs(c1[2]-c2[2])<25;
   };
 
   const hexToRgb = (hex: string) => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return { r, g, b };
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 236, g: 72, b: 153 };
   };
 
   return (

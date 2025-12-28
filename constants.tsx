@@ -11,26 +11,49 @@ export const WARRIORS: Record<ModuleId, Warrior> = {
 };
 
 const SCIENCE_POOL = [
-  { label: 'Mariposa Monarca', icon: 'fa-bug', desc: 'Viajan miles de kilómetros desde Canadá hasta México.' },
-  { label: 'Microscopio', icon: 'fa-microscope', desc: 'Permite ver bacterias y células invisibles al ojo humano.' },
-  { label: 'Sistema Solar', icon: 'fa-sun', desc: 'Nuestra Tierra es el tercer planeta girando alrededor del Sol.' },
-  { label: 'ADN Humano', icon: 'fa-dna', desc: 'Son las instrucciones mágicas que dicen cómo somos.' },
-  { label: 'Fósil de Dino', icon: 'fa-bone', desc: 'Restos de gigantes que vivieron hace millones de años.' },
-  { label: 'Átomo', icon: 'fa-atom', desc: 'La pieza más pequeñita de la que está hecho todo el universo.' },
-  { label: 'Hongo Bosque', icon: 'fa-mushroom', desc: 'Ayudan a limpiar el bosque descomponiendo hojas secas.' },
-  { label: 'Diamante', icon: 'fa-gem', desc: 'Carbono puro que se formó bajo una presión enorme en la Tierra.' },
-  { label: 'Bacteria Buena', icon: 'fa-bacteria', desc: 'Viven en tu barriguita y te ayudan a digerir la comida.' },
-  { label: 'Imán', icon: 'fa-magnet', desc: 'Crea una fuerza invisible que atrae el metal.' },
-  { label: 'Hoja Verde', icon: 'fa-leaf', desc: 'Fabrican oxígeno para que podamos respirar.' },
-  { label: 'Gota de Agua', icon: 'fa-tint', desc: 'Compuesta por dos átomos de Hidrógeno y uno de Oxígeno (H2O).' },
-  { label: 'Cerebro', icon: 'fa-brain', desc: 'El centro de control que envía señales eléctricas a tu cuerpo.' },
-  { label: 'Estrella Fugaz', icon: 'fa-meteor', desc: 'En realidad son piedritas espaciales que se queman al entrar al aire.' },
-  { label: 'Volcán', icon: 'fa-mountain', desc: 'Aberturas en la tierra por donde sale roca derretida llamada lava.' },
-  { label: 'Abeja', icon: 'fa-bee', desc: 'Son esenciales para que las flores y frutas puedan crecer.' },
-  { label: 'Hielo', icon: 'fa-snowflake', desc: 'Agua en estado sólido que forma cristales únicos de 6 puntas.' },
-  { label: 'Semilla', icon: 'fa-seedling', desc: 'Una planta bebé esperando el agua para despertar.' },
-  { label: 'Prisma', icon: 'fa-rainbow', desc: 'Divide la luz blanca en todos los colores del arcoíris.' },
-  { label: 'Luna', icon: 'fa-moon', desc: 'Nuestro único satélite natural que controla las mareas del mar.' }
+  { label: 'Mariposa Monarca', icon: 'fa-bug', desc: 'Viajan miles de kilómetros desde Canadá hasta México buscando el calor.' },
+  { label: 'Microscopio', icon: 'fa-microscope', desc: 'Una herramienta que usa lentes para ver cosas que el ojo no puede notar.' },
+  { label: 'Sistema Solar', icon: 'fa-sun', desc: 'Ocho planetas bailando alrededor de una estrella gigante llamada Sol.' },
+  { label: 'ADN Humano', icon: 'fa-dna', desc: 'El mapa secreto que dice si tienes ojos cafés, pelo liso o eres muy alta.' },
+  { label: 'Fósil de Dino', icon: 'fa-bone', desc: 'Huesos convertidos en piedra que nos cuentan cómo era el mundo hace millones de años.' },
+  { label: 'Átomo', icon: 'fa-atom', desc: 'La pieza más pequeña de Lego del universo. ¡Todo está hecho de ellos!' },
+  { label: 'Hongo Bosque', icon: 'fa-mushroom', desc: 'Crecen en la humedad y ayudan a limpiar el bosque reciclando hojas secas.' },
+  { label: 'Diamante', icon: 'fa-gem', desc: 'Carbono puro que se apretó tanto dentro de la Tierra que se volvió la piedra más dura.' },
+  { label: 'Bacteria Buena', icon: 'fa-bacteria', desc: 'Pequeños bichitos que viven en tu yogur y ayudan a que tu barriga esté feliz.' },
+  { label: 'Imán Mágico', icon: 'fa-magnet', desc: 'Tiene una fuerza invisible que puede atraer metales sin tocarlos.' },
+  { label: 'Hoja Verde', icon: 'fa-leaf', desc: 'Las hojas usan la luz del sol para fabricar su propia comida y darnos oxígeno.' },
+  { label: 'Gota de Agua', icon: 'fa-tint', desc: 'El agua puede ser sólida (hielo), líquida o vapor. ¡Es vital para la vida!' },
+  { label: 'Cerebro Sabio', icon: 'fa-brain', desc: 'La computadora de tu cuerpo. Controla tus sueños, tus pasos y tus risas.' },
+  { label: 'Estrella Fugaz', icon: 'fa-meteor', desc: 'No son estrellas, son rocas espaciales que se queman al entrar a nuestra atmósfera.' },
+  { label: 'Volcán Vivo', icon: 'fa-mountain', desc: 'Una montaña con una chimenea que conecta con el centro ardiente de la Tierra.' },
+  { label: 'Abeja Obrera', icon: 'fa-bee', desc: 'Vuelan de flor en flor llevando polen. Sin ellas, no habría muchas de las frutas que comes.' },
+  { label: 'Copo de Nieve', icon: 'fa-snowflake', desc: 'Cristales de hielo que siempre tienen seis puntas. ¡No hay dos iguales!' },
+  { label: 'Semilla Bebé', icon: 'fa-seedling', desc: 'Toda la fuerza de un árbol gigante está guardada dentro de una pequeña semilla.' },
+  { label: 'Arcoíris', icon: 'fa-rainbow', desc: 'La luz del sol chocando con gotas de lluvia crea este puente de siete colores.' },
+  { label: 'Luna Plateada', icon: 'fa-moon', desc: 'Nuestro satélite natural. Refleja la luz del sol y causa las mareas en el mar.' }
+];
+
+const READING_POOL = [
+  {
+    title: "El Viaje de Jana al Amazonas",
+    content: "Jana preparó su mochila con un microscopio y una lupa. Ella quería encontrar la flor más rara de la selva. Caminó entre árboles gigantes y escuchó el canto de los guacamayos. Al final de un río, encontró una flor que brillaba como el oro. Jana supo que la naturaleza es el tesoro más grande del mundo.",
+    author: "Academia Jana",
+    time: "3 min",
+    questions: [
+      { question: "¿Qué objeto llevaba Jana en su mochila?", options: ["Un microscopio", "Un libro de cuentos", "Una cámara"], correct: 0 },
+      { question: "¿A qué lugar viajó Jana?", options: ["A la luna", "Al Amazonas", "A la playa"], correct: 1 }
+    ]
+  },
+  {
+    title: "La Estrellita que no quería dormir",
+    content: "Había una pequeña estrella llamada Brilli que amaba ver a los niños jugar. Por eso, cuando el Sol salía, ella intentaba esconderse detrás de una nube para no irse a dormir. Pero la Luna le explicó: 'Brilli, si no descansas, no tendrás luz para brillar mañana'. Brilli entendió que dormir es parte de la magia.",
+    author: "Cuentos del Cielo",
+    time: "2 min",
+    questions: [
+      { question: "¿Por qué Brilli no quería dormir?", options: ["Tenía miedo", "Quería ver jugar a los niños", "No estaba cansada"], correct: 1 },
+      { question: "¿Quién aconsejó a la estrellita?", options: ["El Sol", "La Luna", "Una nube"], correct: 1 }
+    ]
+  }
 ];
 
 export const LEVELS: Level[] = (() => {
@@ -39,20 +62,27 @@ export const LEVELS: Level[] = (() => {
   
   modules.forEach(mod => {
     for (let i = 1; i <= 100; i++) {
-      let l: any = { id: `${mod}_${i}`, moduleId: mod, index: i, rewardId: `r_${i}`, help: "¡Tú puedes!" };
+      let l: any = { id: `${mod}_${i}`, moduleId: mod, index: i, rewardId: `r_${i}`, help: "¡Tú puedes, Jana!" };
       
       if (mod === 'science') {
         l.type = 'science-lab';
-        l.objective = "Expedición Natural " + i;
-        // Seleccionar 1 ítem del pool basado en el índice i para que varíen cada nivel
-        const item = SCIENCE_POOL[(i - 1) % SCIENCE_POOL.length];
+        l.objective = "Expedición Natural Nivel " + i;
+        const itemIdx = (i - 1) % SCIENCE_POOL.length;
+        const item = SCIENCE_POOL[itemIdx];
+        
+        // Posicionamiento pseudo-aleatorio pero determinista
+        const angle = (i * 137.5) % 360;
+        const radius = 15 + (i % 30);
+        const x = 50 + radius * Math.cos(angle * Math.PI / 180);
+        const y = 50 + radius * Math.sin(angle * Math.PI / 180);
+
         l.scientificData = { 
             hiddenItems: [
                 { 
                   id: `sci_${i}`, 
                   label: item.label, 
-                  x: 10 + (Math.sin(i) * 0.5 + 0.5) * 80, 
-                  y: 10 + (Math.cos(i * 1.3) * 0.5 + 0.5) * 80, 
+                  x: Math.max(15, Math.min(85, x)), 
+                  y: Math.max(15, Math.min(85, y)), 
                   icon: item.icon, 
                   desc: item.desc 
                 }
@@ -61,7 +91,7 @@ export const LEVELS: Level[] = (() => {
       } else if (mod === 'color') {
         l.type = 'paint';
         l.objective = "Arte Mágico " + i;
-        const icons = ['fa-cat', 'fa-dog', 'fa-rocket', 'fa-star', 'fa-heart', 'fa-apple-alt', 'fa-dragon'];
+        const icons = ['fa-cat', 'fa-dog', 'fa-rocket', 'fa-star', 'fa-heart', 'fa-apple-alt', 'fa-dragon', 'fa-ghost', 'fa-ice-cream', 'fa-tree'];
         l.visual = icons[i % icons.length];
       } else if (mod === 'english') {
         l.type = 'lingua-flow';
@@ -70,7 +100,10 @@ export const LEVELS: Level[] = (() => {
           {q: "Apple", a: "Manzana", v: "fa-apple-alt", p: "ap-el"},
           {q: "Sun", a: "Sol", v: "fa-sun", p: "san"},
           {q: "Water", a: "Agua", v: "fa-tint", p: "uater"},
-          {q: "House", a: "Casa", v: "fa-home", p: "jaus"}
+          {q: "Moon", a: "Luna", v: "fa-moon", p: "mun"},
+          {q: "Tree", a: "Árbol", v: "fa-tree", p: "tri"},
+          {q: "Star", a: "Estrella", v: "fa-star", p: "star"},
+          {q: "Milk", a: "Leche", v: "fa-glass-whiskey", p: "milk"}
         ];
         const w = words[i % words.length];
         l.question = w.q; l.answer = w.a; l.visual = w.v;
@@ -78,24 +111,31 @@ export const LEVELS: Level[] = (() => {
       } else if (mod === 'math') {
         l.type = 'math-master';
         l.objective = "Cálculo Nivel " + i;
-        const v1 = 10 + i; const v2 = 5 + (i % 10);
+        const v1 = 10 + i;
+        const v2 = 5 + (i % 12);
         l.mathData = { op: '+', v1, v2 };
         l.answer = v1 + v2;
       } else if (mod === 'geo') {
         l.type = 'quiz';
         l.objective = "Misión Venezuela";
-        l.question = "¿Cuál es el salto de agua más alto del mundo?";
-        l.options = [{text: "Salto Ángel", isCorrect: true}, {text: "Cataratas del Niágara", isCorrect: false}];
-        l.answer = "Se encuentra en el estado Bolívar, Venezuela.";
+        const geoQuestions = [
+            {q: "¿Cuál es el salto de agua más alto del mundo?", a: "Se llama Salto Ángel y está en el estado Bolívar.", v: "fa-water", o: [{text: "Salto Ángel", isCorrect: true}, {text: "Cataratas", isCorrect: false}]},
+            {q: "¿Cuál es la capital de Venezuela?", a: "Caracas es la ciudad más grande y el centro del país.", v: "fa-city", o: [{text: "Caracas", isCorrect: true}, {text: "Valencia", isCorrect: false}]},
+            {q: "¿Qué animal es un símbolo de los llanos?", a: "El chigüire es el roedor más grande del mundo y vive allí.", v: "fa-paw", o: [{text: "Chigüire", isCorrect: true}, {text: "León", isCorrect: false}]}
+        ];
+        const g = geoQuestions[i % geoQuestions.length];
+        l.question = g.q; l.answer = g.a; l.visual = g.v; l.options = g.o;
       } else if (mod === 'reading') {
         l.type = 'reading-adventure';
         l.objective = "Lectura Nivel " + i;
+        const story = READING_POOL[i % READING_POOL.length];
         l.readingData = {
-          title: "El Misterio de Jana",
-          author: "Academia",
-          content: "Había una vez una niña llamada Jana que amaba la ciencia...",
+          title: story.title,
+          author: story.author,
+          content: story.content,
+          estimatedTime: story.time,
           vocabulary: [],
-          questions: [{question: "¿Cómo se llama la niña?", options: ["Jana", "María"], correct: 0}]
+          questions: story.questions
         };
       }
       levels.push(l);
@@ -104,4 +144,4 @@ export const LEVELS: Level[] = (() => {
   return levels;
 })();
 
-export const MOTIVATIONAL_QUOTES = ["¡Eres brillante!", "¡Increíble!", "¡Lo lograste!", "¡Qué genia!"];
+export const MOTIVATIONAL_QUOTES = ["¡Eres brillante!", "¡Increíble, Jana!", "¡Lo lograste!", "¡Qué genia!", "¡Naturaleza dominada!", "¡Arte perfecto!"];
