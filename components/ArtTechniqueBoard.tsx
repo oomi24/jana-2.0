@@ -73,7 +73,8 @@ const ArtTechniqueBoard: React.FC<ArtTechniqueBoardProps> = ({ level, brushColor
 
       const dist = Math.sqrt(Math.pow(pos.x - nextPoint.x, 2) + Math.pow(pos.y - nextPoint.y, 2));
       
-      if (dist < 70) {
+      // Mantenemos el radio de detección generoso pero el visual es más pequeño
+      if (dist < 60) {
         sounds.playClick();
         if (connectedCount > 0) {
           const prevPoint = art.points[connectedCount - 1];
@@ -141,17 +142,22 @@ const ArtTechniqueBoard: React.FC<ArtTechniqueBoardProps> = ({ level, brushColor
   return (
     <div ref={containerRef} className="w-full h-full flex flex-col items-center bg-[#fafafa] overflow-hidden relative touch-none">
       
-      {/* HUD Superior */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex gap-4 w-full justify-center px-4 pointer-events-none">
-         <div className="bg-white/95 backdrop-blur-md px-6 py-2 rounded-full shadow-2xl border-2 border-pink-100 flex items-center gap-3 pointer-events-auto">
-            <i className={`fas ${String(level.visual)} text-pink-500 text-xl`}></i>
-            <span className="font-black text-sm md:text-base uppercase text-gray-700">{level.objective}</span>
+      {/* HUD - Objetivos en la Esquina Superior Izquierda */}
+      <div className="absolute top-4 left-4 z-30 pointer-events-none">
+         <div className="bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border-2 border-pink-100 flex items-center gap-3 pointer-events-auto">
+            <i className={`fas ${String(level.visual)} text-pink-500 text-lg`}></i>
+            <span className="font-black text-xs md:text-sm uppercase text-gray-700 max-w-[120px] md:max-w-none truncate">{level.objective}</span>
          </div>
-         <button 
+      </div>
+
+      {/* Botón de Guía en la Esquina Superior Derecha */}
+      <div className="absolute top-4 right-4 z-30">
+        <button 
            onClick={() => setShowGuide(!showGuide)} 
-           className={`px-6 py-2 rounded-full font-black text-xs md:text-sm shadow-xl transition-all border-b-4 active:translate-y-1 pointer-events-auto ${showGuide ? 'bg-pink-500 text-white border-pink-700' : 'bg-white text-pink-500 border-pink-100'}`}
+           className={`px-5 py-2 rounded-2xl font-black text-xs shadow-xl transition-all border-b-4 active:translate-y-1 ${showGuide ? 'bg-pink-500 text-white border-pink-700' : 'bg-white text-pink-500 border-pink-100'}`}
          >
-            {showGuide ? 'OCULTAR GUÍA' : 'VER GUÍA'}
+            <i className={`fas ${showGuide ? 'fa-eye-slash' : 'fa-eye'} mr-2`}></i>
+            {showGuide ? 'OCULTAR' : 'VER GUÍA'}
          </button>
       </div>
 
@@ -161,10 +167,10 @@ const ArtTechniqueBoard: React.FC<ArtTechniqueBoardProps> = ({ level, brushColor
           {art?.technique === 'dots' && art.points?.map((p, i) => (
             <div 
               key={i} 
-              className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-300 ${i < connectedCount ? 'opacity-20 scale-75 grayscale' : 'opacity-100 scale-100'}`} 
+              className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-300 ${i < connectedCount ? 'opacity-10 scale-50 grayscale' : 'opacity-100 scale-100'}`} 
               style={{left: `${(p.x/800)*100}%`, top: `${(p.y/600)*100}%`}}
             >
-               <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full border-4 flex items-center justify-center text-lg md:text-2xl font-black shadow-2xl
+               <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full border-2 flex items-center justify-center text-[10px] md:text-sm font-black shadow-lg
                  ${i === connectedCount ? 'bg-pink-500 text-white border-white animate-pulse scale-125 shadow-pink-200' : 'bg-white text-pink-500 border-pink-100'}`}>
                  {p.label}
                </div>
@@ -196,23 +202,23 @@ const ArtTechniqueBoard: React.FC<ArtTechniqueBoardProps> = ({ level, brushColor
         {/* Botón Flotante de Borrado */}
         <button 
           onClick={clearCanvas} 
-          className="absolute right-6 bottom-32 w-20 h-20 md:w-28 md:h-28 bg-rose-50 text-rose-500 rounded-full flex flex-col items-center justify-center shadow-2xl border-4 border-white active:scale-95 transition-all z-40 group"
+          className="absolute right-4 bottom-24 md:bottom-32 w-16 h-16 md:w-24 md:h-24 bg-rose-50 text-rose-500 rounded-full flex flex-col items-center justify-center shadow-2xl border-4 border-white active:scale-95 transition-all z-40 group"
         >
-          <i className="fas fa-trash-alt text-3xl md:text-5xl group-hover:rotate-12"></i>
-          <span className="text-[10px] md:text-xs font-black uppercase mt-1">Borrar</span>
+          <i className="fas fa-trash-alt text-2xl md:text-4xl group-hover:rotate-12"></i>
+          <span className="text-[8px] md:text-xs font-black uppercase mt-1">Borrar</span>
         </button>
       </div>
 
-      {/* Footer de Acciones */}
-      <div className="w-full p-4 md:p-8 bg-white border-t-8 border-pink-50 flex justify-between items-center z-30 shadow-[0_-10px_25px_rgba(0,0,0,0.05)]">
-         <div className="flex items-center gap-6">
-            <div className={`w-14 h-14 md:w-20 md:h-20 rounded-3xl border-4 border-pink-100 flex items-center justify-center ${tool === 'eraser' ? 'bg-pink-500 text-white shadow-lg' : 'bg-gray-50 text-gray-300'}`}>
-               <i className="fas fa-eraser text-xl md:text-3xl"></i>
+      {/* Footer Lateralizado - Botón principal a la derecha */}
+      <div className="w-full p-3 md:p-6 bg-white border-t-4 border-pink-50 flex justify-between items-center z-30 shadow-[0_-10px_25px_rgba(0,0,0,0.05)]">
+         <div className="flex items-center gap-4">
+            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl border-4 border-pink-100 flex items-center justify-center ${tool === 'eraser' ? 'bg-pink-500 text-white shadow-lg' : 'bg-gray-50 text-gray-300'}`}>
+               <i className="fas fa-eraser text-lg md:text-2xl"></i>
             </div>
-            <div className="hidden md:block">
-               <p className="text-xl font-black text-gray-700 leading-none mb-1 uppercase tracking-tighter">Academia de Arte</p>
-               <p className="text-sm font-bold text-gray-400">
-                  {art?.technique === 'dots' ? '¡Conecta todos los números Jana!' : '¡Dibuja siguiendo la silueta!'}
+            <div className="hidden sm:block">
+               <p className="text-xs md:text-lg font-black text-gray-700 leading-none mb-1 uppercase tracking-tighter">MODO TÉCNICO</p>
+               <p className="text-[8px] md:text-xs font-bold text-gray-400">
+                  {art?.technique === 'dots' ? 'Sigue los puntos en orden' : 'Dibuja sobre la guía'}
                </p>
             </div>
          </div>
@@ -222,7 +228,7 @@ const ArtTechniqueBoard: React.FC<ArtTechniqueBoardProps> = ({ level, brushColor
               if (canvasRef.current) onSave(canvasRef.current.toDataURL('image/png'));
               onComplete();
            }} 
-           className="bg-emerald-500 text-white px-12 py-5 md:py-8 rounded-full font-fredoka text-2xl md:text-4xl shadow-[0_15px_30px_rgba(16,185,129,0.3)] border-b-8 border-emerald-700 active:translate-y-2 active:border-b-0 transition-all flex items-center gap-4"
+           className="bg-emerald-500 text-white px-8 py-4 md:px-14 md:py-6 rounded-full font-fredoka text-lg md:text-3xl shadow-[0_10px_20px_rgba(16,185,129,0.3)] border-b-6 border-emerald-700 active:translate-y-2 active:border-b-0 transition-all flex items-center gap-3"
          >
             ¡LISTO JANA! <i className="fas fa-check-circle"></i>
          </button>

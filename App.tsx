@@ -71,16 +71,36 @@ const App: React.FC = () => {
     setCelebrationQuote(String(randomQuote));
     setShowCelebration(true);
 
+    const updatedCompleted = Array.from(new Set([...progress.levelsCompleted, currentLevel.id]));
     setProgress(prev => ({
       ...prev,
-      levelsCompleted: Array.from(new Set([...prev.levelsCompleted, currentLevel.id])),
+      levelsCompleted: updatedCompleted,
       totalPoints: prev.totalPoints + points
     }));
 
+    // El cierre automático se mantiene por si el usuario no pulsa "Siguiente"
     setTimeout(() => {
-      setShowCelebration(false);
+      if (showCelebration) {
+        setShowCelebration(false);
+        setScreen('levels');
+      }
+    }, 4000);
+  };
+
+  const handleNextLevel = () => {
+    if (!currentLevel) return;
+    setShowCelebration(false);
+    
+    const nextIdx = currentLevel.index + 1;
+    const nextLevel = LEVELS.find(l => l.moduleId === currentLevel.moduleId && l.index === nextIdx);
+    
+    if (nextLevel) {
+      setCurrentLevel(nextLevel);
+      setScreen('game');
+    } else {
       setScreen('levels');
-    }, 2500);
+    }
+    sounds.playClick();
   };
 
   const saveToGallery = (dataUrl: string) => {
@@ -99,7 +119,24 @@ const App: React.FC = () => {
     return false;
   };
 
-  const COLORS = ['#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#000000', '#ffffff'];
+  // Paleta ampliada con colores K-Pop
+  const COLORS = [
+    '#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#000000', '#ffffff',
+    '#b026ff', // Neon Purple
+    '#ff69b4', // Hot Pink
+    '#87ceeb', // Sky Blue
+    '#98ff98', // Mint Green
+    '#fffd37', // Sunshine Yellow
+    '#e5e4e2', // Starlight Silver
+    '#0b0d17', // Cosmic Black
+    '#f8f9fa'  // Galaxy White
+  ];
+
+  const isLevelUnlocked = (level: Level) => {
+    if (level.index === 1) return true;
+    const prevLevelId = `${level.moduleId}_${level.index - 1}`;
+    return progress.levelsCompleted.includes(prevLevelId);
+  };
 
   return (
     <div className="h-full w-full overflow-hidden flex flex-col font-quicksand bg-[#fdf2f8]">
@@ -139,14 +176,25 @@ const App: React.FC = () => {
             <IconButton icon="fa-home" onClick={() => setScreen('menu')} colorClass="bg-gray-400" />
             <h2 className="text-2xl font-black text-pink-500 uppercase" style={{ fontFamily: 'Fredoka One, cursive' }}>{String(WARRIORS[selectedModule]?.name)}</h2>
           </div>
-          <div className="flex-grow overflow-y-auto grid grid-cols-5 md:grid-cols-10 gap-2 pb-20">
-            {LEVELS.filter(l => l.moduleId === selectedModule).map(l => (
-              <button key={l.id} onClick={() => { sounds.playClick(); setCurrentLevel(l); setScreen('game'); }}
-                className={`aspect-square rounded-2xl font-black text-xl shadow-md flex items-center justify-center transition-all ${
-                  progress.levelsCompleted.includes(l.id) ? 'bg-pink-500 text-white' : 'bg-white text-pink-500 border-4 border-pink-50'}`}>
-                {l.index}
-              </button>
-            ))}
+          <div className="flex-grow overflow-y-auto grid grid-cols-4 sm:grid-cols-6 md:grid-cols-10 gap-3 pb-20 px-2">
+            {LEVELS.filter(l => l.moduleId === selectedModule).map(l => {
+              const unlocked = isLevelUnlocked(l);
+              const completed = progress.levelsCompleted.includes(l.id);
+              return (
+                <button 
+                  key={l.id} 
+                  disabled={!unlocked}
+                  onClick={() => { sounds.playClick(); setCurrentLevel(l); setScreen('game'); }}
+                  className={`aspect-square rounded-2xl font-black text-xl shadow-md flex items-center justify-center transition-all relative border-b-4 active:translate-y-1 active:border-b-0
+                    ${completed ? 'bg-pink-500 text-white border-pink-700' : 
+                      unlocked ? 'bg-white text-pink-500 border-pink-200 hover:bg-pink-50' : 
+                      'bg-gray-200 text-gray-400 border-gray-300 opacity-60 cursor-not-allowed'}`}
+                >
+                  {unlocked ? l.index : <i className="fas fa-lock text-sm"></i>}
+                  {completed && <i className="fas fa-check-circle absolute -top-2 -right-2 text-green-500 bg-white rounded-full text-xs shadow-sm"></i>}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -166,7 +214,7 @@ const App: React.FC = () => {
                <div className="flex-grow flex flex-col h-full bg-white">
                   <CanvasBoard brushColor={brushColor} brushSize={brushSize} brushShape={brushShape} tool={tool} silhouette={currentLevel.visual} levelId={currentLevel.id} onSave={saveToGallery} />
                   <div className="bg-white border-t-4 border-pink-100 flex flex-col gap-2 p-3 flex-shrink-0">
-                       <div className="flex gap-2 overflow-x-auto pb-1 px-1">
+                       <div className="flex gap-2 overflow-x-auto pb-1 px-1 no-scrollbar">
                           {COLORS.map(c => (
                             <button key={c} onClick={() => setBrushColor(c)}
                               className={`w-10 h-10 md:w-14 md:h-14 rounded-full border-4 transition-all flex-shrink-0 ${brushColor === c ? 'border-pink-500 scale-110 shadow-lg' : 'border-white shadow-sm'}`}
@@ -176,14 +224,12 @@ const App: React.FC = () => {
                        </div>
                        
                        <div className="flex flex-wrap items-center justify-between gap-2 bg-gray-50 p-3 rounded-2xl border border-gray-100 shadow-inner">
-                          {/* Herramientas Principales */}
                           <div className="flex gap-2 md:gap-3">
                              <IconButton icon="fa-brush" onClick={() => setTool('brush')} colorClass={tool === 'brush' ? 'bg-pink-500' : 'bg-white !text-gray-400'} label="Pincel" />
                              <IconButton icon="fa-magic" onClick={() => setTool('magic')} colorClass={tool === 'magic' ? 'bg-purple-500' : 'bg-white !text-gray-400'} label="Magia" />
                              <IconButton icon="fa-eraser" onClick={() => setTool('eraser')} colorClass={tool === 'eraser' ? 'bg-blue-400' : 'bg-white !text-gray-400'} label="Goma" />
                           </div>
 
-                          {/* Forma de Pincel */}
                           <div className="flex gap-2 bg-white p-1 rounded-xl shadow-sm border border-pink-50">
                              <button onClick={() => setBrushShape('round')} className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-lg transition-all ${brushShape === 'round' ? 'bg-pink-100 text-pink-600' : 'text-gray-300'}`}>
                                 <i className="fas fa-circle text-lg"></i>
@@ -193,7 +239,6 @@ const App: React.FC = () => {
                              </button>
                           </div>
 
-                          {/* Tamaños Rápidos */}
                           <div className="flex gap-2">
                              <button onClick={() => setBrushSize(8)} className={`px-3 py-1 md:px-4 md:py-2 rounded-lg font-black text-[10px] md:text-xs transition-all border ${brushSize <= 12 ? 'bg-pink-500 text-white border-pink-600 shadow-md' : 'bg-white text-gray-400 border-gray-200'}`}>
                                 FINO
@@ -206,7 +251,6 @@ const App: React.FC = () => {
                              </button>
                           </div>
 
-                          {/* Slider de precisión */}
                           <div className="flex items-center gap-2">
                              <i className="fas fa-arrows-alt-h text-gray-400 text-xs"></i>
                              <input type="range" min="4" max="150" value={brushSize} onChange={(e) => setBrushSize(parseInt(e.target.value))} className="w-24 md:w-40 accent-pink-500" title="Tamaño libre" />
@@ -232,10 +276,25 @@ const App: React.FC = () => {
       )}
 
       {showCelebration && (
-        <div className="fixed inset-0 z-[100] bg-purple-600/95 flex flex-col items-center justify-center text-white text-center p-6 backdrop-blur-xl">
+        <div className="fixed inset-0 z-[100] bg-purple-600/95 flex flex-col items-center justify-center text-white text-center p-6 backdrop-blur-xl animate-fade-in">
           <div className="text-[10rem] mb-4 animate-bounce">🏆</div>
-          <h2 className="text-5xl font-black mb-2 uppercase" style={{ fontFamily: 'Fredoka One, cursive' }}>¡LO LOGRASTE!</h2>
-          <p className="text-xl font-bold">{celebrationQuote}</p>
+          <h2 className="text-5xl md:text-7xl font-black mb-2 uppercase" style={{ fontFamily: 'Fredoka One, cursive' }}>¡LO LOGRASTE!</h2>
+          <p className="text-xl md:text-3xl font-bold mb-10 text-pink-200">{celebrationQuote}</p>
+          
+          <div className="flex flex-col md:flex-row gap-4 w-full max-w-md">
+             <button 
+               onClick={handleNextLevel}
+               className="flex-grow bg-green-500 text-white py-6 px-10 rounded-[2.5rem] font-fredoka text-2xl md:text-4xl shadow-xl border-b-[8px] border-green-700 active:translate-y-2 active:border-b-0 transition-all flex items-center justify-center gap-4"
+             >
+                SIGUIENTE <i className="fas fa-arrow-right"></i>
+             </button>
+             <button 
+               onClick={() => setShowCelebration(false) || setScreen('levels')}
+               className="bg-white/20 text-white py-4 px-8 rounded-[2rem] font-bold text-lg hover:bg-white/30 transition-all"
+             >
+                Volver al menú
+             </button>
+          </div>
         </div>
       )}
 
@@ -252,6 +311,16 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+      `}</style>
     </div>
   );
 };
