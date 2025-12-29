@@ -1,9 +1,11 @@
 
 export type ModuleId = 'color' | 'math' | 'english' | 'geo' | 'science' | 'reading';
 
-export type LevelType = 'paint' | 'quiz' | 'math-master' | 'lingua-flow' | 'science-lab' | 'reading-adventure';
+export type LevelType = 'paint' | 'quiz' | 'math-master' | 'lingua-flow' | 'science-lab' | 'reading-adventure' | 'art-technique';
 
 export type DrawingTool = 'brush' | 'pencil' | 'magic' | 'eraser' | 'fill';
+
+export type BrushShape = 'round' | 'square';
 
 export interface QuizOption {
   text: string;
@@ -37,7 +39,7 @@ export interface Level {
   factCard?: FactCard;
   hints?: string[];
   scientificData?: {
-    hiddenItems: { id: string, label: string, x: number, y: number, icon: string, symbol?: string, desc?: string }[];
+    hiddenItems: { id: string, label: string, x: number, y: number, icon: string, desc?: string }[];
   };
   readingData?: {
     title: string;
@@ -46,6 +48,12 @@ export interface Level {
     content: string;
     vocabulary: { word: string, meaning: string }[];
     questions: { question: string, options: string[], correct: number }[];
+  };
+  artData?: {
+    technique: 'dots' | 'step-by-step' | 'trace';
+    points?: { x: number, y: number, label: number }[];
+    guideImage?: string;
+    pointsThreshold?: number;
   };
 }
 
