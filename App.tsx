@@ -145,7 +145,7 @@ const App: React.FC = () => {
           <div className="mb-6 animate-bounce text-center">
             <i className="fas fa-star text-7xl md:text-9xl text-yellow-300 drop-shadow-2xl"></i>
           </div>
-          <h1 className="text-5xl md:text-8xl font-black mb-2 text-center uppercase leading-tight" style={{ fontFamily: 'Fredoka One, cursive' }}>K-POP<br/>WARRIORS</h1>
+          <h1 className="text-5xl md:text-8xl font-black mb-2 text-center uppercase leading-tight" style={{ fontFamily: 'Fredoka One, cursive' }}>JANA LA<br/>GUERRERA K-POP</h1>
           <p className="text-xl md:text-2xl mb-8 font-bold opacity-80 uppercase tracking-widest text-pink-200">Paint & Learn: Academia de Jana</p>
           <button onClick={handleStartApp} className="mt-8 bg-white text-pink-600 px-16 py-6 rounded-full text-3xl font-black shadow-2xl active:scale-95 transition-all">¡ENTRAR!</button>
         </div>

@@ -1,7 +1,21 @@
 {
-  "name": "K-Pop Warriors: Paint & Learn",
-  "description": "Un juego educativo para Jana con 100 niveles por materia: Técnica, Lengua, Geografía, Naturaleza y Lectura.",
-  "requestFramePermissions": [
-    "microphone"
+  "name": "Jana la Guerrera K-Pop: Paint & Learn",
+  "short_name": "Jana's World",
+  "description": "A fun and educational app for Jana, our K-Pop Warrior, to paint, learn, and play.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }
