@@ -12,7 +12,6 @@ import GeoBoard from './components/GeoBoard.tsx';
 import ReadingBoard from './components/ReadingBoard.tsx';
 import IconButton from './components/IconButton.tsx';
 import { sounds } from './utils/audio.ts';
-import { syncProgress } from './supabase.ts';
 
 type Screen = 'splash' | 'menu' | 'levels' | 'game' | 'gallery';
 
@@ -20,150 +19,80 @@ const App: React.FC = () => {
   const [screen, setScreen] = useState<Screen>('splash');
   const [selectedModule, setSelectedModule] = useState<ModuleId>('color');
   const [currentLevel, setCurrentLevel] = useState<Level | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [progress, setProgress] = useState<UserProgress>({
     levelsCompleted: [],
     stars: {},
-    stickers: [],
-    gallery: [],
     totalPoints: 0,
-    powerUps: { 
-      doubleXP: 5, hint: 5, extraTime: 5, autoSolve: 2, 
-      nativeEar: 10, contextVision: 10,
-      darwinLens: 10, timeWarp: 10 
-    }
+    gallery: [],
+    powerUps: {}
   });
 
   const [brushColor, setBrushColor] = useState('#ec4899');
   const [brushSize, setBrushSize] = useState(30);
   const [brushShape, setBrushShape] = useState<BrushShape>('round');
   const [tool, setTool] = useState<DrawingTool>('brush');
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [celebrationQuote, setCelebrationQuote] = useState("");
-
-  const JANA_ID = 'jana_tablet_user_v10';
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('jana_kpop_v10');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed) setProgress(prev => ({ ...prev, ...parsed }));
-      }
-    } catch (e) { console.warn(e); }
+    const loading = document.getElementById('loading');
+    if (loading) {
+      setTimeout(() => {
+        loading.style.opacity = '0';
+        setTimeout(() => loading.style.display = 'none', 500);
+      }, 1000);
+    }
   }, []);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('jana_kpop_v10', JSON.stringify(progress));
-      syncProgress(JANA_ID, progress);
-    } catch (e) {}
-  }, [progress]);
-
-  const handleStartApp = () => {
-    setScreen('menu');
-    sounds.unlockAudio().then(() => sounds.playClick()).catch(() => {});
+  const handleLevelSelect = (l: Level) => {
+    sounds.playClick();
+    setCurrentLevel(l);
+    setScreen('game');
   };
 
-  const completeLevel = (points: number = 100) => {
+  const completeLevel = () => {
     if (!currentLevel) return;
     sounds.playCelebration();
-    const randomQuote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
-    setCelebrationQuote(String(randomQuote));
     setShowCelebration(true);
-
-    const updatedCompleted = Array.from(new Set([...progress.levelsCompleted, currentLevel.id]));
     setProgress(prev => ({
       ...prev,
-      levelsCompleted: updatedCompleted,
-      totalPoints: prev.totalPoints + points
+      levelsCompleted: [...new Set([...prev.levelsCompleted, currentLevel.id])],
+      totalPoints: prev.totalPoints + 100
     }));
-
-    // El cierre automático se mantiene por si el usuario no pulsa "Siguiente"
     setTimeout(() => {
-      if (showCelebration) {
-        setShowCelebration(false);
-        setScreen('levels');
-      }
-    }, 4000);
-  };
-
-  const handleNextLevel = () => {
-    if (!currentLevel) return;
-    setShowCelebration(false);
-    
-    const nextIdx = currentLevel.index + 1;
-    const nextLevel = LEVELS.find(l => l.moduleId === currentLevel.moduleId && l.index === nextIdx);
-    
-    if (nextLevel) {
-      setCurrentLevel(nextLevel);
-      setScreen('game');
-    } else {
+      setShowCelebration(false);
       setScreen('levels');
-    }
-    sounds.playClick();
-  };
-
-  const saveToGallery = (dataUrl: string) => {
-    const newItem = { id: Date.now().toString(), timestamp: Date.now(), dataUrl, title: String(currentLevel?.objective || 'Mi Arte') };
-    setProgress(prev => ({ ...prev, gallery: [newItem, ...prev.gallery].slice(0, 40) }));
-  };
-
-  const handleUsePowerUp = (type: string) => {
-    if (progress.powerUps[type] > 0) {
-      setProgress(prev => ({
-        ...prev,
-        powerUps: { ...prev.powerUps, [type]: prev.powerUps[type] - 1 }
-      }));
-      return true;
-    }
-    return false;
-  };
-
-  // Paleta ampliada con colores K-Pop
-  const COLORS = [
-    '#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#000000', '#ffffff',
-    '#b026ff', // Neon Purple
-    '#ff69b4', // Hot Pink
-    '#87ceeb', // Sky Blue
-    '#98ff98', // Mint Green
-    '#fffd37', // Sunshine Yellow
-    '#e5e4e2', // Starlight Silver
-    '#0b0d17', // Cosmic Black
-    '#f8f9fa'  // Galaxy White
-  ];
-
-  const isLevelUnlocked = (level: Level) => {
-    if (level.index === 1) return true;
-    const prevLevelId = `${level.moduleId}_${level.index - 1}`;
-    return progress.levelsCompleted.includes(prevLevelId);
+    }, 3000);
   };
 
   return (
     <div className="h-full w-full overflow-hidden flex flex-col font-quicksand bg-[#fdf2f8]">
+      
       {screen === 'splash' && (
-        <div className="flex-grow flex flex-col items-center justify-center bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600 text-white p-6 relative">
-          <div className="mb-6 animate-bounce text-center">
-            <i className="fas fa-star text-7xl md:text-9xl text-yellow-300 drop-shadow-2xl"></i>
+        <div className="flex-grow flex flex-col items-center justify-center bg-gradient-to-br from-pink-400 via-rose-500 to-purple-600 text-white p-6">
+          <div className="mb-8 animate-bounce">
+            <i className="fas fa-star text-8xl text-yellow-300 drop-shadow-xl"></i>
           </div>
-          <h1 className="text-5xl md:text-8xl font-black mb-2 text-center uppercase leading-tight" style={{ fontFamily: 'Fredoka One, cursive' }}>K-POP<br/>WARRIORS</h1>
-          <p className="text-xl md:text-2xl mb-8 font-bold opacity-80 uppercase tracking-widest text-pink-200">Paint & Learn: Academia de Jana</p>
-          <button onClick={handleStartApp} className="mt-8 bg-white text-pink-600 px-16 py-6 rounded-full text-3xl font-black shadow-2xl active:scale-95 transition-all">¡ENTRAR!</button>
+          <h1 className="text-6xl md:text-8xl font-black mb-4 text-center leading-none uppercase" style={{ fontFamily: 'Fredoka One' }}>K-POP<br/>WARRIORS</h1>
+          <p className="text-xl md:text-2xl font-bold opacity-90 tracking-widest mb-12">PAINT & LEARN • ACADEMIA JANA</p>
+          <button onClick={() => { sounds.unlockAudio(); setScreen('menu'); }} className="bg-white text-pink-600 px-20 py-6 rounded-full text-3xl font-black shadow-2xl active:scale-95 transition-all">¡ENTRAR!</button>
         </div>
       )}
 
       {screen === 'menu' && (
-        <div className="p-4 md:p-6 flex-grow flex flex-col gap-4 overflow-y-auto">
-          <div className="flex justify-between items-center bg-white/80 backdrop-blur-md p-4 rounded-3xl shadow-lg border-b-4 border-pink-100 mb-2">
-             <h2 className="text-xl font-black text-pink-500 uppercase">Elige tu Misión</h2>
-             <IconButton icon="fa-images" onClick={() => setScreen('gallery')} colorClass="bg-purple-400" label="Galería" />
+        <div className="p-6 flex-grow flex flex-col overflow-y-auto">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-black text-pink-500 uppercase" style={{ fontFamily: 'Fredoka One' }}>Elige tu Misión</h2>
+            <div className="flex gap-4">
+               <IconButton icon="fa-images" onClick={() => setScreen('gallery')} colorClass="bg-purple-400" />
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Object.values(WARRIORS).map(w => (
-              <div key={w.id} onClick={() => { sounds.playClick(); setSelectedModule(w.id); setScreen('levels'); }} 
-                className={`p-6 rounded-[2.5rem] bg-gradient-to-br ${w.gradient} text-white cursor-pointer hover:scale-[1.02] active:scale-95 transition-all shadow-xl h-44 flex flex-col justify-between border-4 border-white/20 relative overflow-hidden group`}>
-                <i className={`fas ${w.icon} text-6xl absolute -bottom-2 -right-2 opacity-10 group-hover:scale-110 transition-transform`}></i>
-                <h3 className="text-3xl font-black uppercase tracking-tighter relative z-10" style={{ fontFamily: 'Fredoka One, cursive' }}>{String(w.name)}</h3>
-                <span className="text-xs font-bold opacity-80 uppercase tracking-widest relative z-10">{String(w.subject)}</span>
+              <div key={w.id} onClick={() => { setSelectedModule(w.id); setScreen('levels'); sounds.playClick(); }} 
+                className={`p-8 rounded-[3rem] bg-gradient-to-br ${w.gradient} text-white cursor-pointer hover:scale-[1.02] active:scale-95 transition-all shadow-xl h-56 flex flex-col justify-between border-4 border-white/20 relative overflow-hidden group`}>
+                <i className={`fas ${w.icon} text-8xl absolute -bottom-4 -right-4 opacity-10 group-hover:scale-110 transition-all`}></i>
+                <h3 className="text-4xl font-black uppercase relative z-10" style={{ fontFamily: 'Fredoka One' }}>{w.name}</h3>
+                <span className="text-sm font-bold opacity-80 uppercase tracking-widest relative z-10">{w.subject}</span>
               </div>
             ))}
           </div>
@@ -171,27 +100,26 @@ const App: React.FC = () => {
       )}
 
       {screen === 'levels' && (
-        <div className="p-4 md:p-6 flex-grow flex flex-col gap-4 overflow-hidden">
-          <div className="flex items-center gap-3">
-            <IconButton icon="fa-home" onClick={() => setScreen('menu')} colorClass="bg-gray-400" />
-            <h2 className="text-2xl font-black text-pink-500 uppercase" style={{ fontFamily: 'Fredoka One, cursive' }}>{String(WARRIORS[selectedModule]?.name)}</h2>
+        <div className="p-6 flex-grow flex flex-col overflow-hidden">
+          <div className="flex items-center gap-4 mb-8">
+            <IconButton icon="fa-arrow-left" onClick={() => setScreen('menu')} colorClass="bg-gray-400" />
+            <h2 className="text-3xl font-black text-pink-500 uppercase" style={{ fontFamily: 'Fredoka One' }}>Niveles de {WARRIORS[selectedModule].name}</h2>
           </div>
-          <div className="flex-grow overflow-y-auto grid grid-cols-4 sm:grid-cols-6 md:grid-cols-10 gap-3 pb-20 px-2">
+          <div className="flex-grow overflow-y-auto grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 gap-4 pb-12 px-2">
             {LEVELS.filter(l => l.moduleId === selectedModule).map(l => {
-              const unlocked = isLevelUnlocked(l);
               const completed = progress.levelsCompleted.includes(l.id);
+              const unlocked = l.index === 1 || progress.levelsCompleted.includes(`${l.moduleId}_${l.index - 1}`);
               return (
                 <button 
                   key={l.id} 
                   disabled={!unlocked}
-                  onClick={() => { sounds.playClick(); setCurrentLevel(l); setScreen('game'); }}
-                  className={`aspect-square rounded-2xl font-black text-xl shadow-md flex items-center justify-center transition-all relative border-b-4 active:translate-y-1 active:border-b-0
+                  onClick={() => handleLevelSelect(l)}
+                  className={`aspect-square rounded-3xl font-black text-2xl shadow-md flex items-center justify-center transition-all border-b-4 active:translate-y-1 active:border-b-0
                     ${completed ? 'bg-pink-500 text-white border-pink-700' : 
-                      unlocked ? 'bg-white text-pink-500 border-pink-200 hover:bg-pink-50' : 
-                      'bg-gray-200 text-gray-400 border-gray-300 opacity-60 cursor-not-allowed'}`}
+                      unlocked ? 'bg-white text-pink-500 border-pink-100' : 
+                      'bg-gray-200 text-gray-400 border-gray-300 opacity-60'}`}
                 >
                   {unlocked ? l.index : <i className="fas fa-lock text-sm"></i>}
-                  {completed && <i className="fas fa-check-circle absolute -top-2 -right-2 text-green-500 bg-white rounded-full text-xs shadow-sm"></i>}
                 </button>
               );
             })}
@@ -201,126 +129,41 @@ const App: React.FC = () => {
 
       {screen === 'game' && currentLevel && (
         <div className="flex-grow flex flex-col overflow-hidden h-full relative">
-          <div className="p-2 bg-white/90 flex justify-between items-center border-b-2 border-pink-50 z-20">
+          <div className="p-4 bg-white/90 backdrop-blur-md flex justify-between items-center border-b-2 border-pink-50 z-20">
             <IconButton icon="fa-arrow-left" onClick={() => setScreen('levels')} colorClass="bg-gray-400" />
-            <h3 className="font-black text-purple-600 uppercase truncate px-4">{String(currentLevel.objective)}</h3>
+            <h3 className="font-black text-gray-600 uppercase tracking-widest">{currentLevel.objective}</h3>
             {currentLevel.type === 'paint' ? (
-              <IconButton icon="fa-check" onClick={() => completeLevel()} colorClass="bg-green-500" label="OK" />
+               <IconButton icon="fa-check" onClick={completeLevel} colorClass="bg-green-500" />
             ) : <div className="w-12"></div>}
           </div>
 
-          <div className="flex-grow flex flex-col overflow-hidden relative">
-             {currentLevel.type === 'paint' ? (
-               <div className="flex-grow flex flex-col h-full bg-white">
-                  <CanvasBoard brushColor={brushColor} brushSize={brushSize} brushShape={brushShape} tool={tool} silhouette={currentLevel.visual} levelId={currentLevel.id} onSave={saveToGallery} />
-                  <div className="bg-white border-t-4 border-pink-100 flex flex-col gap-2 p-3 flex-shrink-0">
-                       <div className="flex gap-2 overflow-x-auto pb-1 px-1 no-scrollbar">
-                          {COLORS.map(c => (
-                            <button key={c} onClick={() => setBrushColor(c)}
-                              className={`w-10 h-10 md:w-14 md:h-14 rounded-full border-4 transition-all flex-shrink-0 ${brushColor === c ? 'border-pink-500 scale-110 shadow-lg' : 'border-white shadow-sm'}`}
-                              style={{ backgroundColor: c }}
-                            />
-                          ))}
-                       </div>
-                       
-                       <div className="flex flex-wrap items-center justify-between gap-2 bg-gray-50 p-3 rounded-2xl border border-gray-100 shadow-inner">
-                          <div className="flex gap-2 md:gap-3">
-                             <IconButton icon="fa-brush" onClick={() => setTool('brush')} colorClass={tool === 'brush' ? 'bg-pink-500' : 'bg-white !text-gray-400'} label="Pincel" />
-                             <IconButton icon="fa-magic" onClick={() => setTool('magic')} colorClass={tool === 'magic' ? 'bg-purple-500' : 'bg-white !text-gray-400'} label="Magia" />
-                             <IconButton icon="fa-eraser" onClick={() => setTool('eraser')} colorClass={tool === 'eraser' ? 'bg-blue-400' : 'bg-white !text-gray-400'} label="Goma" />
-                          </div>
-
-                          <div className="flex gap-2 bg-white p-1 rounded-xl shadow-sm border border-pink-50">
-                             <button onClick={() => setBrushShape('round')} className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-lg transition-all ${brushShape === 'round' ? 'bg-pink-100 text-pink-600' : 'text-gray-300'}`}>
-                                <i className="fas fa-circle text-lg"></i>
-                             </button>
-                             <button onClick={() => setBrushShape('square')} className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-lg transition-all ${brushShape === 'square' ? 'bg-pink-100 text-pink-600' : 'text-gray-300'}`}>
-                                <i className="fas fa-square text-lg"></i>
-                             </button>
-                          </div>
-
-                          <div className="flex gap-2">
-                             <button onClick={() => setBrushSize(8)} className={`px-3 py-1 md:px-4 md:py-2 rounded-lg font-black text-[10px] md:text-xs transition-all border ${brushSize <= 12 ? 'bg-pink-500 text-white border-pink-600 shadow-md' : 'bg-white text-gray-400 border-gray-200'}`}>
-                                FINO
-                             </button>
-                             <button onClick={() => setBrushSize(35)} className={`px-3 py-1 md:px-4 md:py-2 rounded-lg font-black text-[10px] md:text-xs transition-all border ${brushSize > 12 && brushSize <= 50 ? 'bg-pink-500 text-white border-pink-600 shadow-md' : 'bg-white text-gray-400 border-gray-200'}`}>
-                                MEDIO
-                             </button>
-                             <button onClick={() => setBrushSize(85)} className={`px-3 py-1 md:px-4 md:py-2 rounded-lg font-black text-[10px] md:text-xs transition-all border ${brushSize > 50 ? 'bg-pink-500 text-white border-pink-600 shadow-md' : 'bg-white text-gray-400 border-gray-200'}`}>
-                                GRUESO
-                             </button>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                             <i className="fas fa-arrows-alt-h text-gray-400 text-xs"></i>
-                             <input type="range" min="4" max="150" value={brushSize} onChange={(e) => setBrushSize(parseInt(e.target.value))} className="w-24 md:w-40 accent-pink-500" title="Tamaño libre" />
-                          </div>
-                       </div>
+          <div className="flex-grow flex items-center justify-center p-4">
+             {currentLevel.moduleId === 'math' ? (
+               <MathBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => {}} />
+             ) : currentLevel.type === 'paint' ? (
+               <div className="w-full h-full flex flex-col gap-4">
+                  <CanvasBoard brushColor={brushColor} brushSize={brushSize} brushShape={brushShape} tool={tool} silhouette={currentLevel.visual} levelId={currentLevel.id} onSave={(url) => setProgress(p => ({...p, gallery: [url, ...p.gallery].slice(0, 20)}))} />
+                  <div className="bg-white p-4 rounded-3xl shadow-lg flex gap-4 overflow-x-auto no-scrollbar">
+                    {['#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#000000', '#ffffff'].map(c => (
+                      <button key={c} onClick={() => setBrushColor(c)} className={`w-12 h-12 rounded-full border-4 flex-shrink-0 transition-all ${brushColor === c ? 'border-pink-500 scale-110' : 'border-white'}`} style={{backgroundColor: c}} />
+                    ))}
                   </div>
                </div>
-             ) : currentLevel.type === 'art-technique' ? (
-                <ArtTechniqueBoard level={currentLevel} brushColor={brushColor} brushSize={brushSize} tool={tool} onComplete={completeLevel} onSave={saveToGallery} />
-             ) : currentLevel.moduleId === 'geo' ? (
-               <GeoBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} />
-             ) : currentLevel.moduleId === 'math' ? (
-               <MathBoard level={currentLevel} powerUps={progress.powerUps} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} usePowerUp={handleUsePowerUp} />
-             ) : currentLevel.moduleId === 'english' ? (
-               <LinguaBoard level={currentLevel} powerUps={progress.powerUps} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} usePowerUp={handleUsePowerUp} />
-             ) : currentLevel.moduleId === 'science' ? (
-               <ScienceBoard level={currentLevel} powerUps={progress.powerUps} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} usePowerUp={handleUsePowerUp} />
-             ) : currentLevel.moduleId === 'reading' ? (
-               <ReadingBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} />
-             ) : <QuizBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => sounds.playWrong()} />}
+             ) : (
+               <QuizBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => {}} />
+             )}
           </div>
         </div>
       )}
 
       {showCelebration && (
-        <div className="fixed inset-0 z-[100] bg-purple-600/95 flex flex-col items-center justify-center text-white text-center p-6 backdrop-blur-xl animate-fade-in">
-          <div className="text-[10rem] mb-4 animate-bounce">🏆</div>
-          <h2 className="text-5xl md:text-7xl font-black mb-2 uppercase" style={{ fontFamily: 'Fredoka One, cursive' }}>¡LO LOGRASTE!</h2>
-          <p className="text-xl md:text-3xl font-bold mb-10 text-pink-200">{celebrationQuote}</p>
-          
-          <div className="flex flex-col md:flex-row gap-4 w-full max-w-md">
-             <button 
-               onClick={handleNextLevel}
-               className="flex-grow bg-green-500 text-white py-6 px-10 rounded-[2.5rem] font-fredoka text-2xl md:text-4xl shadow-xl border-b-[8px] border-green-700 active:translate-y-2 active:border-b-0 transition-all flex items-center justify-center gap-4"
-             >
-                SIGUIENTE <i className="fas fa-arrow-right"></i>
-             </button>
-             <button 
-               onClick={() => setShowCelebration(false) || setScreen('levels')}
-               className="bg-white/20 text-white py-4 px-8 rounded-[2rem] font-bold text-lg hover:bg-white/30 transition-all"
-             >
-                Volver al menú
-             </button>
-          </div>
+        <div className="fixed inset-0 z-[100] bg-pink-500/90 backdrop-blur-xl flex flex-col items-center justify-center text-white p-8 animate-fade-in text-center">
+          <div className="text-[12rem] mb-4 animate-bounce">🏆</div>
+          <h2 className="text-6xl md:text-8xl font-black mb-4 uppercase" style={{ fontFamily: 'Fredoka One' }}>¡GENIAL!</h2>
+          <p className="text-2xl font-bold opacity-80 uppercase tracking-widest">Misión Cumplida Jana</p>
         </div>
       )}
 
-      {screen === 'gallery' && (
-        <div className="p-4 md:p-6 flex-grow flex flex-col gap-4 overflow-y-auto bg-purple-50">
-          <IconButton icon="fa-arrow-left" onClick={() => setScreen('menu')} colorClass="bg-gray-400" />
-          <h2 className="text-2xl font-black text-purple-600 uppercase">Mi Galería de Arte</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-20">
-            {progress.gallery.map(item => (
-              <div key={item.id} className="bg-white p-2 rounded-2xl shadow-xl border-4 border-pink-100 transition-transform hover:rotate-1">
-                <img src={item.dataUrl} className="rounded-xl w-full aspect-square object-contain" />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
-      `}</style>
     </div>
   );
 };
