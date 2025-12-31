@@ -17,9 +17,15 @@ export interface Level {
   objective: string;
   help: string;
   question?: string;
+  storyProblem?: string; // Nuevo: Para problemas de matemáticas con historia
+  visualHint?: string;   // Nuevo: Para mostrar emojis como ayuda visual
   visual?: string; 
   answer?: any;
   options?: QuizOption[];
+  // Fix for GeoBoard error: hints property
+  hints?: string[];
+  // Added for better typing in LinguaBoard
+  englishData?: { pronunciation: string };
   mathData?: { op: string; v1: number; v2: number; obj?: string };
   scientificData?: { hiddenItems: any[] };
   readingData?: any;

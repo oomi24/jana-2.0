@@ -18,7 +18,7 @@ const LinguaBoard: React.FC<LinguaBoardProps> = ({ level, onCorrect, onWrong }) 
   const [speechResult, setSpeechResult] = useState('');
   const [mode, setMode] = useState<'translate' | 'pronounce'>('translate');
   
-  const eng = (level as any).englishData;
+  const eng = level.englishData;
   const letters = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split("");
   const recognitionRef = useRef<any>(null);
 
@@ -30,7 +30,6 @@ const LinguaBoard: React.FC<LinguaBoardProps> = ({ level, onCorrect, onWrong }) 
     // Auto-pronunciación al iniciar
     setTimeout(() => speak(), 600);
 
-    // Setup Speech Recognition
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
@@ -44,14 +43,8 @@ const LinguaBoard: React.FC<LinguaBoardProps> = ({ level, onCorrect, onWrong }) 
         setIsListening(false);
         checkPronunciation(transcript);
       };
-
-      recognitionRef.current.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
+      recognitionRef.current.onerror = () => setIsListening(false);
+      recognitionRef.current.onend = () => setIsListening(false);
     }
 
     return () => {
@@ -116,7 +109,6 @@ const LinguaBoard: React.FC<LinguaBoardProps> = ({ level, onCorrect, onWrong }) 
   return (
     <div className="w-full h-full flex flex-col p-2 md:p-6 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-y-auto lg:overflow-hidden font-quicksand">
       
-      {/* Módulo de Entrenamiento Visual */}
       <div className="flex-grow flex flex-col items-center justify-center gap-4 bg-white/90 backdrop-blur-md rounded-[2rem] md:rounded-[3.5rem] p-6 shadow-xl border-4 md:border-8 border-white mb-4 relative min-h-[400px]">
         
         <div className="absolute top-4 left-4 flex gap-2">
@@ -132,7 +124,7 @@ const LinguaBoard: React.FC<LinguaBoardProps> = ({ level, onCorrect, onWrong }) 
             <h3 className="text-4xl md:text-8xl font-fredoka text-gray-800 uppercase leading-none mb-2">
                 {level.question}
             </h3>
-            <p className="text-sm md:text-3xl text-blue-400 font-bold italic opacity-70">
+            <p className="text-2xl md:text-4xl text-blue-400 font-bold italic bg-blue-50 px-6 py-2 rounded-2xl shadow-inner inline-block">
                /{eng?.pronunciation || '...'}/
             </p>
         </div>
@@ -174,7 +166,6 @@ const LinguaBoard: React.FC<LinguaBoardProps> = ({ level, onCorrect, onWrong }) 
         </div>
       </div>
 
-      {/* Teclado - Solo visible en modo traducción */}
       {mode === 'translate' && (
         <div className="w-full bg-white p-3 md:p-6 rounded-[1.5rem] md:rounded-[3rem] shadow-xl border-b-4 md:border-b-8 border-blue-100 shrink-0">
           <div className="grid grid-cols-7 sm:grid-cols-9 gap-1.5 md:gap-3">

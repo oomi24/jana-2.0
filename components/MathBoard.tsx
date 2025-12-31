@@ -11,8 +11,7 @@ interface MathBoardProps {
 
 const MathBoard: React.FC<MathBoardProps> = ({ level, onCorrect, onWrong }) => {
   const [input, setInput] = useState('');
-  const data = level.mathData;
-
+  
   useEffect(() => { setInput(''); }, [level.id]);
 
   const handleSubmit = () => {
@@ -33,21 +32,31 @@ const MathBoard: React.FC<MathBoardProps> = ({ level, onCorrect, onWrong }) => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-4 md:p-8 bg-white/50 backdrop-blur-sm rounded-[3rem] shadow-inner border-4 border-white animate-fade-in">
-      <div className="text-center mb-8">
-        <span className="bg-purple-100 text-purple-600 px-6 py-2 rounded-full text-sm font-black uppercase tracking-widest mb-4 inline-block shadow-sm">
+    <div className="w-full h-full flex flex-col items-center justify-center p-4 md:p-8 bg-white/50 backdrop-blur-sm rounded-[3rem] shadow-inner border-4 border-white animate-fade-in overflow-y-auto">
+      <div className="text-center mb-6 max-w-2xl">
+        <span className="bg-purple-100 text-purple-600 px-6 py-2 rounded-full text-sm font-black uppercase tracking-widest mb-6 inline-block shadow-sm">
           Reto de Técnica #{level.index}
         </span>
-        <div className="text-6xl md:text-8xl mb-6 drop-shadow-md">{data?.obj || '⭐️'}</div>
-        <h2 className="text-4xl md:text-7xl font-fredoka text-gray-800 flex items-center gap-6 justify-center">
-          {data?.v1} {data?.op} {data?.v2} = 
-          <div className="bg-white w-24 md:w-40 h-20 md:h-32 rounded-3xl border-4 border-purple-200 flex items-center justify-center shadow-inner text-purple-600">
-            {input || '?'}
-          </div>
+        
+        {/* Ayuda Visual con Emojis */}
+        <div className="text-5xl md:text-7xl mb-6 bg-white/80 p-6 rounded-[2.5rem] shadow-sm inline-block tracking-widest animate-pulse">
+           {level.visualHint}
+        </div>
+
+        {/* Problema Narrativo */}
+        <h2 className="text-2xl md:text-4xl font-bold text-gray-800 mb-8 leading-tight px-4">
+           {level.storyProblem}
         </h2>
+
+        {/* Caja de Respuesta Principal */}
+        <div className="flex justify-center mb-8">
+           <div className="bg-white w-32 md:w-56 h-24 md:h-40 rounded-[2.5rem] border-4 border-purple-200 flex items-center justify-center shadow-xl text-purple-600">
+              <span className="text-5xl md:text-8xl font-fredoka">{input || "?"}</span>
+           </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 max-w-sm w-full">
+      <div className="grid grid-cols-3 gap-3 max-w-sm w-full">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(n => (
           <button
             key={n}
@@ -62,7 +71,7 @@ const MathBoard: React.FC<MathBoardProps> = ({ level, onCorrect, onWrong }) => {
         <button 
           onClick={handleSubmit} 
           disabled={!input}
-          className="col-span-3 mt-4 bg-green-500 text-white py-4 rounded-2xl font-fredoka text-2xl shadow-lg border-b-4 border-green-700 active:translate-y-1 active:border-b-0 disabled:opacity-50"
+          className="col-span-3 mt-4 bg-green-500 text-white py-4 md:py-6 rounded-3xl font-fredoka text-2xl md:text-3xl shadow-lg border-b-8 border-green-700 active:translate-y-1 active:border-b-4 transition-all disabled:opacity-50"
         >
           ¡COMPROBAR!
         </button>

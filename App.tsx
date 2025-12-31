@@ -132,14 +132,25 @@ const App: React.FC = () => {
           <div className="p-4 bg-white/90 backdrop-blur-md flex justify-between items-center border-b-2 border-pink-50 z-20">
             <IconButton icon="fa-arrow-left" onClick={() => setScreen('levels')} colorClass="bg-gray-400" />
             <h3 className="font-black text-gray-600 uppercase tracking-widest">{currentLevel.objective}</h3>
-            {currentLevel.type === 'paint' ? (
+            {currentLevel.type === 'paint' || currentLevel.type === 'art-technique' ? (
                <IconButton icon="fa-check" onClick={completeLevel} colorClass="bg-green-500" />
             ) : <div className="w-12"></div>}
           </div>
 
-          <div className="flex-grow flex items-center justify-center p-4">
+          <div className="flex-grow flex items-center justify-center p-4 overflow-hidden">
+             {/* Dynamic board selection based on module and level type */}
              {currentLevel.moduleId === 'math' ? (
                <MathBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => {}} />
+             ) : currentLevel.moduleId === 'english' ? (
+               <LinguaBoard level={currentLevel} powerUps={{}} onCorrect={completeLevel} onWrong={() => {}} usePowerUp={() => false} />
+             ) : currentLevel.moduleId === 'geo' ? (
+               <GeoBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => {}} />
+             ) : currentLevel.moduleId === 'science' ? (
+               <ScienceBoard level={currentLevel} powerUps={{}} onCorrect={completeLevel} onWrong={() => {}} usePowerUp={() => false} />
+             ) : currentLevel.type === 'reading-adventure' ? (
+               <ReadingBoard level={currentLevel} onCorrect={completeLevel} onWrong={() => {}} />
+             ) : currentLevel.type === 'art-technique' ? (
+               <ArtTechniqueBoard level={currentLevel} brushColor={brushColor} brushSize={brushSize} tool={tool} onComplete={completeLevel} onSave={(url) => setProgress(p => ({...p, gallery: [url, ...p.gallery].slice(0, 20)}))} />
              ) : currentLevel.type === 'paint' ? (
                <div className="w-full h-full flex flex-col gap-4">
                   <CanvasBoard brushColor={brushColor} brushSize={brushSize} brushShape={brushShape} tool={tool} silhouette={currentLevel.visual} levelId={currentLevel.id} onSave={(url) => setProgress(p => ({...p, gallery: [url, ...p.gallery].slice(0, 20)}))} />
